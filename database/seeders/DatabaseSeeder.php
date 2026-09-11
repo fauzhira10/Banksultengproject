@@ -17,9 +17,17 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        // Seed admin user if not exists
+        User::firstOrCreate(
+            ['email' => 'admin@banksulteng.co.id'],
+            [
+                'name' => 'Administrator Bank Sulteng',
+                'password' => bcrypt('password'),
+            ]
+        );
+
+        $this->call([
+            TerminalSeeder::class,
         ]);
     }
 }

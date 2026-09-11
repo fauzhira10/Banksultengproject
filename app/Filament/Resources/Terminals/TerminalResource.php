@@ -9,6 +9,7 @@ use App\Filament\Resources\Terminals\Pages\ViewTerminal;
 use App\Filament\Resources\Terminals\Schemas\TerminalForm;
 use App\Filament\Resources\Terminals\Schemas\TerminalInfolist;
 use App\Filament\Resources\Terminals\Tables\TerminalsTable;
+use App\Filament\Resources\Terminals\Widgets\TerminalOverviewWidget;
 use App\Models\Terminal;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -22,7 +23,29 @@ class TerminalResource extends Resource
 {
     protected static ?string $model = Terminal::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedServerStack;
+
+    protected static ?string $navigationLabel = 'Terminal ATM & CRM';
+
+    protected static ?string $modelLabel = 'Terminal ATM';
+
+    protected static ?string $pluralModelLabel = 'Terminal ATM & CRM';
+
+    protected static string|\UnitEnum|null $navigationGroup = 'Master ATM';
+
+    protected static ?int $navigationSort = 1;
+
+    public static function getNavigationBadge(): ?string
+    {
+        return (string) static::getModel()::count();
+    }
+
+    public static function getWidgets(): array
+    {
+        return [
+            TerminalOverviewWidget::class,
+        ];
+    }
 
     public static function form(Schema $schema): Schema
     {

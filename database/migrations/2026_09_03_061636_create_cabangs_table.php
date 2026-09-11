@@ -13,6 +13,10 @@ return new class extends Migration
     {
         Schema::create('cabangs', function (Blueprint $table) {
             $table->id();
+            $table->string('kode_cabang', 20)->unique();
+            $table->string('nama_cabang', 100);
+            $table->string('label_cabang', 120)->nullable();
+            $table->integer('urutan')->nullable();
             $table->timestamps();
         });
     }

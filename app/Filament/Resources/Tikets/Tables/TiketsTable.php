@@ -1,0 +1,177 @@
+<?php
+
+namespace App\Filament\Resources\Tikets\Tables;
+
+use App\Models\Cabang;
+use App\Models\Tiket;
+use Filament\Actions\Action;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
+use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Textarea;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+
+class TiketsTable
+{
+    public static function configure(Table $table): Table
+    {
+        return $table
+            ->columns([
+                TextColumn::make('nomor_tiket')
+                    ->label('No Tiket')
+                    ->searchable()
+                    ->sortable()
+                    ->weight('bold')
+                    ->copyable()
+                    ->badge()
+                    ->color('primary'),
+
+                TextColumn::make('cabang_text')
+                    ->label('Cabang/Capem/Kas')
+                    ->state(fn (Tiket $record): string => $record->cabang?->label_cabang ?? $record->cabang_text ?? '-')
+                    ->searchable()
+                    ->sortable(),
+
+                TextColumn::make('terminal.profil')
+                    ->label('Profil ATM')
+                    ->searchable()
+                    ->sortable()
+                    ->weight('semibold')
+                    ->description(fn (Tiket $record): string => $record->terminal?->nama_lokasi ?? '-'),
+
+                TextColumn::make('terminal.tipe_mesin')
+                    ->label('Tipe Mesin')
+                    ->badge()
+                    ->color('gray')
+                    ->searchable()
+                    ->placeholder('-'),
+
+                TextColumn::make('permasalahan')
+                    ->label('Permasalahan')
+                    ->searchable()
+                    ->sortable()
+                    ->wrap()
+                    ->weight('medium'),
+
+                TextColumn::make('kategori_problem')
+                    ->label('Kategori')
+                    ->badge()
+                    ->color(fn (?string $state): string => match ($state) {
+                        'Mesin ATM' => 'primary',
+                        'System' => 'info',
+                        'Jaringan' => 'warning',
+                        'Listrik' => 'danger',
+                        default => 'gray',
+                    })
+                    ->searchable()
+                    ->sortable(),
+
+                TextColumn::make('mulai')
+                    ->label('Open (Mulai)')
+                    ->dateTime('d/m/Y H:i')
+                    ->sortable(),
+
+                TextColumn::make('selesai')
+                    ->label('Closed (Selesai)')
+                    ->dateTime('d/m/Y H:i')
+                    ->sortable()
+                    ->placeholder('Masih Open')
+                    ->color(fn ($state) => $state ? null : 'warning'),
+
+                TextColumn::make('durasi_lengkap')
+                    ->label('Durasi Problem')
+                    ->placeholder('Masih Berjalan')
+                    ->description(fn (Tiket $record): string => $record->durasi_jam_menit ? "{$record->durasi_jam_menit} jam ({$record->durasi_menit} mnt)" : '')
+                    ->toggleable(),
+
+                TextColumn::make('status')
+                    ->label('Status')
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'Open' => 'warning',
+                        'Closed' => 'success',
+                        default => 'gray',
+                    })
+                    ->sortable(),
+            ])
+            ->defaultSort('mulai', 'desc')
+            ->filters([
+                SelectFilter::make('status')
+                    ->label('Status Tiket')
+                    ->options([
+                        'Open' => 'Open (Dalam Proses)',
+                        'Closed' => 'Closed (Selesai)',
+                    ]),
+
+                SelectFilter::make('kategori_problem')
+                    ->label('Kategori Problem')
+                    ->options([
+                        'Mesin ATM' => 'Mesin ATM',
+                        'System' => 'System',
+                        'Jaringan' => 'Jaringan',
+                        'Listrik' => 'Listrik',
+                    ]),
+
+                SelectFilter::make('cabang_id')
+                    ->label('Kantor Cabang')
+                    ->options(fn () => Cabang::orderBy('urutan')->pluck('label_cabang', 'id')->toArray())
+                    ->searchable(),
+
+                Filter::make('rentang_waktu')
+                    ->form([
+                        DateTimePicker::make('dari')->label('Mulai Dari'),
+                        DateTimePicker::make('sampai')->label('Sampai Dengan'),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                $data['dari'],
+                                fn (Builder $query, $date): Builder => $query->whereDate('mulai', '>=', $date),
+                            )
+                            ->when(
+                                $data['sampai'],
+                                fn (Builder $query, $date): Builder => $query->whereDate('mulai', '<=', $date),
+                            );
+                    }),
+            ])
+            ->actions([
+                Action::make('closeTicket')
+                    ->label('Tutup Tiket')
+                    ->icon('heroicon-m-check-circle')
+                    ->color('success')
+                    ->visible(fn (Tiket $record): bool => $record->status === 'Open')
+                    ->form([
+                        DateTimePicker::make('selesai')
+                            ->label('Waktu Selesai (Closed)')
+                            ->required()
+                            ->default(now()),
+                        Textarea::make('tindakan')
+                            ->label('Tindakan / Solusi Perbaikan')
+                            ->placeholder('Tuliskan perbaikan yang telah diselesaikan oleh teknisi vendor...')
+                            ->required(),
+                    ])
+                    ->action(function (Tiket $record, array $data): void {
+                        $record->selesai = $data['selesai'];
+                        $record->tindakan = $data['tindakan'];
+                        $record->status = 'Closed';
+                        $record->save();
+                    }),
+
+                ViewAction::make(),
+                EditAction::make(),
+                DeleteAction::make(),
+            ])
+            ->bulkActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
+                ]),
+            ]);
+    }
+}
