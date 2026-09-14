@@ -18,4 +18,14 @@ class ViewTiket extends ViewRecord
             EditAction::make(),
         ];
     }
+
+    /**
+     * Breadcrumb diganti tombol "Kembali" (render hook `filament.hooks.tiket-view-back-button`).
+     *
+     * @return array<string>
+     */
+    public function getBreadcrumbs(): array
+    {
+        return [];
+    }
 }

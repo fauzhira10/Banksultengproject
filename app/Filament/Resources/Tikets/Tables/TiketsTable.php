@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Tikets\Tables;
 
+use App\Filament\Resources\Tikets\TiketResource;
 use App\Models\Cabang;
 use App\Models\Tiket;
 use Filament\Actions\Action;
@@ -9,7 +10,6 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Support\Enums\Size;
 use Filament\Tables\Columns\TextColumn;
@@ -130,6 +130,7 @@ class TiketsTable
             ])
             ->defaultSort('mulai', 'desc')
             ->recordClasses(fn (Tiket $record): ?string => $record->status === 'Open' ? 'bs-tiket-row-open' : null)
+            ->recordUrl(fn (Tiket $record): string => TiketResource::getUrl('view', ['record' => $record]))
             ->filters([
                 SelectFilter::make('status')
                     ->label('Status Tiket')
@@ -199,13 +200,6 @@ class TiketsTable
                         $record->status = 'Closed';
                         $record->save();
                     }),
-
-                ViewAction::make()
-                    ->label('Lihat')
-                    ->icon('heroicon-m-eye')
-                    ->color('gray')
-                    ->button()
-                    ->size(Size::ExtraSmall),
 
                 EditAction::make()
                     ->label('Ubah')

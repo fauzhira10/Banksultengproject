@@ -4,6 +4,7 @@ namespace App\Providers\Filament;
 
 use App\Filament\Pages\Auth\Login;
 use App\Filament\Resources\Tikets\Pages\ListTikets;
+use App\Filament\Resources\Tikets\Pages\ViewTiket;
 use Filament\Enums\ThemeMode;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -56,6 +57,11 @@ class AdminPanelProvider extends PanelProvider
                 PanelsRenderHook::BODY_END,
                 fn () => view('filament.hooks.table-scroll-to-end'),
                 scopes: ListTikets::class,
+            )
+            ->renderHook(
+                PanelsRenderHook::PAGE_HEADER_HEADING_BEFORE,
+                fn () => view('filament.hooks.tiket-view-back-button'),
+                scopes: ViewTiket::class,
             )
             ->renderHook(
                 PanelsRenderHook::SIMPLE_LAYOUT_START,
