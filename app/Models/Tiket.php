@@ -135,8 +135,9 @@ class Tiket extends Model
     public static function generateNomorTiket(): string
     {
         $prefix = 'BST'.date('ymd');
-        $last = static::where('nomor_tiket', 'like', "{$prefix}%")
-            ->orderByDesc('id')
+        $last = static::withTrashed()
+            ->where('nomor_tiket', 'like', "{$prefix}%")
+            ->orderByDesc('nomor_tiket')
             ->value('nomor_tiket');
 
         if ($last && preg_match('/(\d{4})$/', $last, $matches)) {
@@ -145,6 +146,13 @@ class Tiket extends Model
             $nextNumber = '0001';
         }
 
-        return $prefix.$nextNumber;
+        $candidate = $prefix.$nextNumber;
+
+        while (static::withTrashed()->where('nomor_tiket', $candidate)->exists()) {
+            $nextNumber = str_pad((int) $nextNumber + 1, 4, '0', STR_PAD_LEFT);
+            $candidate = $prefix.$nextNumber;
+        }
+
+        return $candidate;
     }
 }

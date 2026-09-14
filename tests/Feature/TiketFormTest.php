@@ -258,4 +258,89 @@ class TiketFormTest extends TestCase
 
         $this->assertSame(1, substr_count($html, 'bs-tiket-row-open'));
     }
+
+    public function test_generate_nomor_tiket_skips_soft_deleted_tickets(): void
+    {
+        $prefix = 'BST'.date('ymd');
+
+        // Create a ticket and soft-delete it
+        $cabang = Cabang::create([
+            'kode_cabang' => '001',
+            'nama_cabang' => 'KCU Palu',
+            'label_cabang' => '001-KCU Palu',
+        ]);
+        $terminal = Terminal::create([
+            'profil' => 'WCR.KCU1',
+            'nama_lokasi' => 'Galeri ATM Kantor Pusat',
+            'cabang_id' => $cabang->id,
+            'kategori' => 'ATM',
+            'tipe_mesin' => 'Wincor 280',
+            'status' => 'Aktif',
+        ]);
+
+        $tiket1 = Tiket::create([
+            'terminal_id' => $terminal->id,
+            'nomor_tiket' => $prefix.'0001',
+            'kategori_problem' => 'Mesin ATM',
+            'permasalahan' => 'DISPENSER ERROR',
+            'mulai' => now(),
+            'status' => 'Open',
+        ]);
+
+        $tiket1->delete(); // Soft deleted
+
+        $nextNumber = Tiket::generateNomorTiket();
+        $this->assertSame($prefix.'0002', $nextNumber);
+    }
+
+    public function test_user_can_create_ticket_when_previous_ticket_was_soft_deleted(): void
+    {
+        $user = User::factory()->create();
+        $cabang = Cabang::create([
+            'kode_cabang' => '001',
+            'nama_cabang' => 'KCU Palu',
+            'label_cabang' => '001-KCU Palu',
+        ]);
+        $terminal = Terminal::create([
+            'profil' => 'WCR.KCU1',
+            'nama_lokasi' => 'Galeri ATM Kantor Pusat',
+            'cabang_id' => $cabang->id,
+            'kategori' => 'ATM',
+            'tipe_mesin' => 'Wincor 280',
+            'status' => 'Aktif',
+        ]);
+
+        $prefix = 'BST'.date('ymd');
+
+        $deletedTiket = Tiket::create([
+            'terminal_id' => $terminal->id,
+            'nomor_tiket' => $prefix.'0001',
+            'kategori_problem' => 'Mesin ATM',
+            'permasalahan' => 'DISPENSER ERROR',
+            'mulai' => now()->subHour(),
+            'status' => 'Open',
+        ]);
+        $deletedTiket->delete(); // Soft-deleted
+
+        $this->actingAs($user);
+
+        Livewire::test(CreateTiket::class)
+            ->assertSuccessful()
+            ->fillForm([
+                'terminal_id' => $terminal->id,
+                'kategori_problem' => 'Mesin ATM',
+                'permasalahan' => 'SOFTWARE CORRUPT',
+                'deskripsi' => 'Uji coba kendala baru',
+                'status' => 'Open',
+                'mulai' => now()->format('Y-m-d H:i:s'),
+            ])
+            ->call('create')
+            ->assertHasNoFormErrors();
+
+        $this->assertDatabaseHas('tikets', [
+            'nomor_tiket' => $prefix.'0002',
+            'permasalahan' => 'SOFTWARE CORRUPT',
+            'deleted_at' => null,
+        ]);
+    }
 }

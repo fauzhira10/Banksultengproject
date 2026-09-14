@@ -9,6 +9,7 @@ use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ViewAction;
+use Filament\Support\Enums\Size;
 use Filament\Tables\Columns\SelectColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\TextInputColumn;
@@ -169,9 +170,24 @@ class TerminalsTable
                     ->label('Kategori Mesin')
                     ->collapsible(),
             ])
+            ->recordActionsColumnLabel('Aksi')
+            ->recordActionsAlignment('center')
             ->recordActions([
-                ViewAction::make()->slideOver(),
-                EditAction::make()->slideOver(),
+                ViewAction::make()
+                    ->label('Lihat')
+                    ->icon('heroicon-m-eye')
+                    ->color('info')
+                    ->button()
+                    ->size(Size::ExtraSmall)
+                    ->slideOver(),
+
+                EditAction::make()
+                    ->label('Ubah')
+                    ->icon('heroicon-m-pencil-square')
+                    ->color('primary')
+                    ->button()
+                    ->size(Size::ExtraSmall)
+                    ->slideOver(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

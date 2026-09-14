@@ -450,7 +450,7 @@
                             $hasProblem = $row['downtime_menit'] > 0;
                             $pct = $row['uptime_persen'];
                         @endphp
-                        <tr class="transition-colors hover:bg-blue-100/60 dark:hover:bg-slate-800/80 {{ $hasProblem ? 'bg-rose-50/50 dark:bg-rose-950/20' : 'even:bg-slate-50/60 dark:even:bg-slate-850' }}">
+                        <tr class="transition-colors hover:bg-blue-50/80 dark:hover:bg-slate-800/60 {{ $hasProblem ? 'bg-rose-50/50 dark:bg-rose-950/25' : 'even:bg-slate-50/60 dark:even:bg-slate-800/40' }}">
                             <!-- Kolom 1: No -->
                             <td class="px-4 py-3.5 text-center font-bold text-slate-600 dark:text-slate-400 text-sm">
                                 {{ $row['no'] }}
@@ -459,7 +459,7 @@
                             <!-- Kolom 2: Profil Terminal & Indikator Masalah -->
                             <td class="px-4 py-3.5">
                                 <div class="flex items-center gap-2">
-                                    <span class="font-extrabold text-base text-slate-900 dark:text-white">{{ $row['profil'] }}</span>
+                                    <span class="font-extrabold text-base text-slate-900 dark:text-slate-100">{{ $row['profil'] }}</span>
                                     @if ($row['tiket_count'] > 0)
                                         <span class="inline-flex items-center gap-1 rounded-md bg-rose-200 px-2 py-0.5 text-xs font-black text-rose-900 dark:bg-rose-950 dark:text-rose-200 border border-rose-300 dark:border-rose-800" title="{{ $row['tiket_count'] }} tiket insiden bulan ini">
                                             <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 8 8">
@@ -486,9 +486,9 @@
                                     <span class="rounded-md bg-slate-200 px-2 py-0.5 font-bold text-slate-800 dark:bg-slate-700 dark:text-slate-200">
                                         {{ $row['tipe_mesin'] }}
                                     </span>
-                                    <span>SN: <span class="font-mono font-bold text-slate-900 dark:text-white">{{ $row['serial_number'] }}</span></span>
+                                    <span>SN: <span class="font-mono font-bold text-slate-900 dark:text-slate-200">{{ $row['serial_number'] }}</span></span>
                                     @if($row['luno'] && $row['luno'] !== '-')
-                                        <span>• Luno: <span class="font-mono font-bold text-slate-900 dark:text-white">{{ $row['luno'] }}</span></span>
+                                        <span>• Luno: <span class="font-mono font-bold text-slate-900 dark:text-slate-200">{{ $row['luno'] }}</span></span>
                                     @endif
                                 </div>
                             </td>

@@ -5,6 +5,8 @@ namespace App\Filament\Resources\Cabangs\Tables;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
+use Filament\Support\Enums\Size;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -43,8 +45,23 @@ class CabangsTable
             ->filters([
                 //
             ])
+            ->recordActionsColumnLabel('Aksi')
+            ->recordActionsAlignment('center')
             ->recordActions([
-                EditAction::make(),
+                ViewAction::make()
+                    ->label('Lihat')
+                    ->icon('heroicon-m-eye')
+                    ->color('info')
+                    ->button()
+                    ->size(Size::ExtraSmall)
+                    ->slideOver(),
+
+                EditAction::make()
+                    ->label('Ubah')
+                    ->icon('heroicon-m-pencil-square')
+                    ->color('primary')
+                    ->button()
+                    ->size(Size::ExtraSmall),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
