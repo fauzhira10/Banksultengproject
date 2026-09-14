@@ -55,9 +55,8 @@ class TiketFormTest extends TestCase
                 'kategori_problem' => 'Mesin ATM',
                 'permasalahan' => 'DISPENSER ERROR',
                 'deskripsi' => 'Uang macet di modul dispenser',
-                'contact_person' => 'Michael CS',
-                'phone_number' => '082196336263',
                 'status' => 'Open',
+                'status_keterangan' => 'Dalam proses penanganan',
                 'mulai' => now()->subHours(2)->format('Y-m-d H:i:s'),
             ])
             ->call('create')
@@ -69,6 +68,54 @@ class TiketFormTest extends TestCase
             'kategori_problem' => 'Mesin ATM',
             'permasalahan' => 'DISPENSER ERROR',
             'status' => 'Open',
+            'status_keterangan' => 'Dalam proses penanganan',
+            'profil' => 'WCR.KCU1',
+            'tipe_mesin' => 'Wincor 280',
+        ]);
+    }
+
+    public function test_ticket_duration_is_calculated_accurately(): void
+    {
+        $user = User::factory()->create();
+        $cabang = Cabang::create([
+            'kode_cabang' => '001',
+            'nama_cabang' => 'KCU Palu',
+            'label_cabang' => '001-KCU Palu',
+        ]);
+        $vendor = Vendor::create(['nama_vendor' => 'SRISHINDU']);
+        $terminal = Terminal::create([
+            'profil' => 'WCR.KCU1',
+            'nama_lokasi' => 'Galeri ATM Kantor Pusat',
+            'cabang_id' => $cabang->id,
+            'vendor_id' => $vendor->id,
+            'kategori' => 'ATM',
+            'tipe_mesin' => 'Wincor 280',
+            'denom' => '100',
+            'status' => 'Aktif',
+        ]);
+
+        $this->actingAs($user);
+
+        Livewire::test(CreateTiket::class)
+            ->assertSuccessful()
+            ->fillForm([
+                'terminal_id' => $terminal->id,
+                'kategori_problem' => 'Mesin ATM',
+                'permasalahan' => 'DISPENSER ERROR',
+                'mulai' => '2026-09-01 10:00:00',
+                'selesai' => '2026-09-11 22:00:00',
+                'status_keterangan' => 'Selesai perbaikan vendor',
+            ])
+            ->call('create')
+            ->assertHasNoFormErrors();
+
+        $this->assertDatabaseHas('tikets', [
+            'terminal_id' => $terminal->id,
+            'status' => 'Closed',
+            'durasi_lengkap' => '10 hari 12 jam 0 menit 0 detik',
+            'durasi_jam_menit' => '252:00',
+            'durasi_menit' => 15120,
+            'status_keterangan' => 'Selesai perbaikan vendor',
         ]);
     }
 }

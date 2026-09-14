@@ -20,12 +20,18 @@ class Tiket extends Model
         'jenis_masalah_id',
         'kategori_problem',
         'permasalahan',
+        'lokasi',
+        'atm_id',
+        'profil',
+        'tipe_mesin',
+        'serial_number',
         'mulai',
         'selesai',
         'durasi_menit',
         'durasi_jam_menit',
         'durasi_lengkap',
         'status',
+        'status_keterangan',
         'deskripsi',
         'tindakan',
         'contact_person',
@@ -41,12 +47,29 @@ class Tiket extends Model
     protected static function booted(): void
     {
         static::saving(function (Tiket $tiket) {
-            // Sinkronisasi cabang dari terminal jika belum terisi
-            if ($tiket->terminal_id && ! $tiket->cabang_id) {
+            // Sinkronisasi data terminal jika terminal_id diisi
+            if ($tiket->terminal_id) {
                 $terminal = Terminal::with('cabang')->find($tiket->terminal_id);
                 if ($terminal) {
-                    $tiket->cabang_id = $terminal->cabang_id;
-                    $tiket->cabang_text = $terminal->cabang?->label_cabang ?? $terminal->cabang_text;
+                    if (! $tiket->cabang_id) {
+                        $tiket->cabang_id = $terminal->cabang_id;
+                        $tiket->cabang_text = $terminal->cabang?->label_cabang ?? $terminal->cabang_text;
+                    }
+                    if (empty($tiket->lokasi)) {
+                        $tiket->lokasi = $terminal->nama_lokasi;
+                    }
+                    if (empty($tiket->atm_id)) {
+                        $tiket->atm_id = $terminal->luno;
+                    }
+                    if (empty($tiket->profil)) {
+                        $tiket->profil = $terminal->profil;
+                    }
+                    if (empty($tiket->tipe_mesin)) {
+                        $tiket->tipe_mesin = $terminal->tipe_mesin;
+                    }
+                    if (empty($tiket->serial_number)) {
+                        $tiket->serial_number = $terminal->serial_number;
+                    }
                 }
             }
 
@@ -69,7 +92,7 @@ class Tiket extends Model
                     $remHours = floor(($totalMinutes % 1440) / 60);
                     $remMins = $totalMinutes % 60;
                     $remSecs = $totalSeconds % 60;
-                    $tiket->durasi_lengkap = "{$days}hari{$remHours}jam{$remMins}menit{$remSecs}detik";
+                    $tiket->durasi_lengkap = "{$days} hari {$remHours} jam {$remMins} menit {$remSecs} detik";
 
                     // Bila selesai diisi dan status masih Open, otomatis tandai Closed
                     if ($tiket->status === 'Open' || empty($tiket->status)) {

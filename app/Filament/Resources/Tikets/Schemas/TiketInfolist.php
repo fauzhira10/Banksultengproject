@@ -33,47 +33,45 @@ class TiketInfolist
                                     default => 'gray',
                                 }),
 
-                            TextEntry::make('created_at')
-                                ->label('Waktu Dibuat di Sistem')
-                                ->dateTime('d M Y H:i:s'),
+                            TextEntry::make('status_keterangan')
+                                ->label('Status Keterangan')
+                                ->placeholder('-'),
                         ]),
                     ]),
 
-                Section::make('Data Mesin ATM & Lokasi')
+                Section::make('Data Mesin ATM (Sesuai Kolom Excel)')
                     ->icon('heroicon-o-cpu-chip')
                     ->schema([
                         Grid::make(3)->schema([
-                            TextEntry::make('terminal.profil')
-                                ->label('Profil ATM')
+                            TextEntry::make('lokasi')
+                                ->label('Lokasi')
+                                ->state(fn (Tiket $record) => $record->lokasi ?? $record->terminal?->nama_lokasi ?? '-'),
+
+                            TextEntry::make('atm_id')
+                                ->label('ID (ID Mesin / LUNO)')
+                                ->state(fn (Tiket $record) => $record->atm_id ?? $record->terminal?->luno ?? '-')
+                                ->fontFamily('mono'),
+
+                            TextEntry::make('profil')
+                                ->label('Profile ATM')
+                                ->state(fn (Tiket $record) => $record->profil ?? $record->terminal?->profil ?? '-')
                                 ->badge()
                                 ->color('info'),
 
-                            TextEntry::make('terminal.nama_lokasi')
-                                ->label('Nama Lokasi Fisik'),
+                            TextEntry::make('tipe_mesin')
+                                ->label('Type (Tipe Mesin)')
+                                ->state(fn (Tiket $record) => $record->tipe_mesin ?? $record->terminal?->tipe_mesin ?? '-')
+                                ->badge()
+                                ->color('gray'),
+
+                            TextEntry::make('serial_number')
+                                ->label('SN (Serial Number)')
+                                ->state(fn (Tiket $record) => $record->serial_number ?? $record->terminal?->serial_number ?? '-')
+                                ->fontFamily('mono'),
 
                             TextEntry::make('cabang.label_cabang')
-                                ->label('Cabang / Capem / Kas')
+                                ->label('Cabang Pengelola')
                                 ->placeholder(fn (Tiket $record) => $record->cabang_text ?? '-'),
-
-                            TextEntry::make('terminal.luno')
-                                ->label('ID Mesin / LUNO')
-                                ->fontFamily('mono')
-                                ->placeholder('-'),
-
-                            TextEntry::make('terminal.serial_number')
-                                ->label('Serial Number (SN)')
-                                ->fontFamily('mono')
-                                ->placeholder('-'),
-
-                            TextEntry::make('terminal.tipe_mesin')
-                                ->label('Tipe Mesin ATM')
-                                ->badge()
-                                ->color('gray')
-                                ->placeholder('-'),
-
-                            TextEntry::make('terminal.vendor.nama_vendor')
-                                ->label('Vendor Pemeliharaan')
-                                ->placeholder(fn (Tiket $record) => $record->terminal?->vendor_text ?? '-'),
                         ]),
                     ]),
 
@@ -96,46 +94,37 @@ class TiketInfolist
                                     default => 'gray',
                                 }),
 
-                            TextEntry::make('durasi_lengkap')
-                                ->label('Durasi Problem (Format Lengkap)')
-                                ->placeholder('Masih Berjalan (Open)'),
+                            TextEntry::make('created_at')
+                                ->label('Waktu Dicatat di Sistem')
+                                ->dateTime('d M Y H:i:s'),
 
                             TextEntry::make('mulai')
-                                ->label('Waktu Open Tiket (Mulai)')
+                                ->label('Open Tiket (Start)')
                                 ->dateTime('d/m/Y H:i:s'),
 
                             TextEntry::make('selesai')
-                                ->label('Waktu Closed Tiket (Selesai)')
+                                ->label('Closed Tiket (End)')
                                 ->dateTime('d/m/Y H:i:s')
-                                ->placeholder('Tiket Belum Ditutup (Open)'),
+                                ->placeholder('Masih Open (Berjalan)'),
+
+                            TextEntry::make('durasi_lengkap')
+                                ->label('1. Durasi Lengkap')
+                                ->placeholder('Masih Berjalan (Open)'),
+
+                            TextEntry::make('durasi_jam_menit')
+                                ->label('2. Durasi Jam:Menit')
+                                ->fontFamily('mono')
+                                ->placeholder('-'),
 
                             TextEntry::make('durasi_menit')
-                                ->label('Total Down Time (Menit)')
-                                ->formatStateUsing(fn ($state, Tiket $record) => $state ? "{$state} menit ({$record->durasi_jam_menit} jam)" : '-'),
+                                ->label('3. Total Menit')
+                                ->fontFamily('mono')
+                                ->formatStateUsing(fn ($state) => $state ? "{$state} Menit" : '-'),
 
                             TextEntry::make('deskripsi')
-                                ->label('Deskripsi Masalah')
+                                ->label('Detail Catatan Kendala')
                                 ->columnSpan(3)
                                 ->placeholder('Tidak ada catatan tambahan.'),
-                        ]),
-                    ]),
-
-                Section::make('Kontak Pelapor & Tindakan Perbaikan')
-                    ->icon('heroicon-o-user-group')
-                    ->schema([
-                        Grid::make(2)->schema([
-                            TextEntry::make('contact_person')
-                                ->label('Contact Person (PIC / Pelapor)')
-                                ->placeholder('-'),
-
-                            TextEntry::make('phone_number')
-                                ->label('Nomor Telepon / WhatsApp')
-                                ->placeholder('-'),
-
-                            TextEntry::make('tindakan')
-                                ->label('Tindakan / Solusi Perbaikan')
-                                ->columnSpan(2)
-                                ->placeholder('Belum ada catatan tindakan perbaikan.'),
                         ]),
                     ]),
             ]);

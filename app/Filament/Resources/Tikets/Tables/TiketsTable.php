@@ -33,26 +33,6 @@ class TiketsTable
                     ->badge()
                     ->color('primary'),
 
-                TextColumn::make('cabang_text')
-                    ->label('Cabang/Capem/Kas')
-                    ->state(fn (Tiket $record): string => $record->cabang?->label_cabang ?? $record->cabang_text ?? '-')
-                    ->searchable()
-                    ->sortable(),
-
-                TextColumn::make('terminal.profil')
-                    ->label('Profil ATM')
-                    ->searchable()
-                    ->sortable()
-                    ->weight('semibold')
-                    ->description(fn (Tiket $record): string => $record->terminal?->nama_lokasi ?? '-'),
-
-                TextColumn::make('terminal.tipe_mesin')
-                    ->label('Tipe Mesin')
-                    ->badge()
-                    ->color('gray')
-                    ->searchable()
-                    ->placeholder('-'),
-
                 TextColumn::make('permasalahan')
                     ->label('Permasalahan')
                     ->searchable()
@@ -73,23 +53,70 @@ class TiketsTable
                     ->searchable()
                     ->sortable(),
 
+                TextColumn::make('lokasi')
+                    ->label('Lokasi')
+                    ->state(fn (Tiket $record): string => $record->lokasi ?? $record->terminal?->nama_lokasi ?? '-')
+                    ->searchable()
+                    ->sortable()
+                    ->wrap(),
+
+                TextColumn::make('atm_id')
+                    ->label('ID / LUNO')
+                    ->state(fn (Tiket $record): string => $record->atm_id ?? $record->terminal?->luno ?? '-')
+                    ->fontFamily('mono')
+                    ->searchable()
+                    ->sortable(),
+
+                TextColumn::make('profil')
+                    ->label('Profile')
+                    ->state(fn (Tiket $record): string => $record->profil ?? $record->terminal?->profil ?? '-')
+                    ->weight('semibold')
+                    ->searchable()
+                    ->sortable(),
+
+                TextColumn::make('tipe_mesin')
+                    ->label('Type')
+                    ->state(fn (Tiket $record): string => $record->tipe_mesin ?? $record->terminal?->tipe_mesin ?? '-')
+                    ->badge()
+                    ->color('gray')
+                    ->searchable(),
+
+                TextColumn::make('serial_number')
+                    ->label('SN')
+                    ->state(fn (Tiket $record): string => $record->serial_number ?? $record->terminal?->serial_number ?? '-')
+                    ->fontFamily('mono')
+                    ->searchable(),
+
                 TextColumn::make('mulai')
-                    ->label('Open (Mulai)')
+                    ->label('Open Tiket')
                     ->dateTime('d/m/Y H:i')
                     ->sortable(),
 
                 TextColumn::make('selesai')
-                    ->label('Closed (Selesai)')
+                    ->label('Closed Tiket')
                     ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->placeholder('Masih Open')
                     ->color(fn ($state) => $state ? null : 'warning'),
 
                 TextColumn::make('durasi_lengkap')
-                    ->label('Durasi Problem')
+                    ->label('Durasi Lengkap')
                     ->placeholder('Masih Berjalan')
-                    ->description(fn (Tiket $record): string => $record->durasi_jam_menit ? "{$record->durasi_jam_menit} jam ({$record->durasi_menit} mnt)" : '')
+                    ->description(fn (Tiket $record): string => $record->durasi_jam_menit ? "{$record->durasi_jam_menit} ({$record->durasi_menit} mnt)" : '')
                     ->toggleable(),
+
+                TextColumn::make('durasi_jam_menit')
+                    ->label('Jam:Menit')
+                    ->placeholder('-')
+                    ->fontFamily('mono')
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                TextColumn::make('durasi_menit')
+                    ->label('Total Menit')
+                    ->numeric()
+                    ->placeholder('-')
+                    ->fontFamily('mono')
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('status')
                     ->label('Status')
@@ -100,6 +127,12 @@ class TiketsTable
                         default => 'gray',
                     })
                     ->sortable(),
+
+                TextColumn::make('status_keterangan')
+                    ->label('Status Keterangan')
+                    ->wrap()
+                    ->placeholder('-')
+                    ->toggleable(),
             ])
             ->defaultSort('mulai', 'desc')
             ->filters([
@@ -152,14 +185,14 @@ class TiketsTable
                             ->label('Waktu Selesai (Closed)')
                             ->required()
                             ->default(now()),
-                        Textarea::make('tindakan')
-                            ->label('Tindakan / Solusi Perbaikan')
-                            ->placeholder('Tuliskan perbaikan yang telah diselesaikan oleh teknisi vendor...')
-                            ->required(),
+                        Textarea::make('status_keterangan')
+                            ->label('Status Keterangan')
+                            ->placeholder('Tuliskan keterangan status penyelesaian tiket...')
+                            ->rows(3),
                     ])
                     ->action(function (Tiket $record, array $data): void {
                         $record->selesai = $data['selesai'];
-                        $record->tindakan = $data['tindakan'];
+                        $record->status_keterangan = $data['status_keterangan'] ?? null;
                         $record->status = 'Closed';
                         $record->save();
                     }),
