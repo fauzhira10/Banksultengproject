@@ -9,7 +9,17 @@ use BackedEnum;
 use Carbon\Carbon;
 use Filament\Pages\Page;
 use Filament\Support\Icons\Heroicon;
-use Symfony\Component\HttpFoundation\StreamedResponse;
+use OpenSpout\Common\Entity\Cell;
+use OpenSpout\Common\Entity\Row;
+use OpenSpout\Common\Entity\Style\Border;
+use OpenSpout\Common\Entity\Style\BorderPart;
+use OpenSpout\Common\Entity\Style\CellAlignment;
+use OpenSpout\Common\Entity\Style\CellVerticalAlignment;
+use OpenSpout\Common\Entity\Style\Color;
+use OpenSpout\Common\Entity\Style\Style;
+use OpenSpout\Writer\XLSX\Options;
+use OpenSpout\Writer\XLSX\Writer;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class LaporanSlaBulanan extends Page
 {
@@ -308,67 +318,206 @@ class LaporanSlaBulanan extends Page
         ];
     }
 
-    public function exportCsv(): StreamedResponse
+    public function exportExcel(): BinaryFileResponse
     {
         $data = $this->reportData;
-        $vendorName = $this->selectedVendorName;
-        $monthName = $this->selectedMonthName;
+        $vendorName = strtoupper($this->selectedVendorName);
+        $monthName = strtoupper($this->selectedMonthName);
         $year = $this->tahun;
 
-        $fileName = "Laporan_SLA_{$vendorName}_{$monthName}_{$year}.csv";
+        $fileName = "Laporan_SLA_{$vendorName}_{$monthName}_{$year}.xlsx";
+        $fileName = (string) preg_replace('/[^A-Za-z0-9_\-\.]/', '_', $fileName);
 
-        $headers = [
-            'Content-Type' => 'text/csv; charset=UTF-8',
-            'Content-Disposition' => "attachment; filename=\"{$fileName}\"",
-        ];
+        $rowCount = count($data['rows']);
 
-        return response()->stream(function () use ($data, $vendorName, $monthName, $year) {
-            $handle = fopen('php://output', 'w');
-            // UTF-8 BOM
-            fwrite($handle, "\xEF\xBB\xBF");
+        $options = new Options;
+        $options->setColumnWidth(10, 1); // No
+        $options->setColumnWidth(22, 2); // Profil ATM
+        $options->setColumnWidth(32, 3); // CABANG/KCP/KAS
+        $options->setColumnWidth(48, 4); // LOKASI
+        $options->setColumnWidth(24, 5); // DOWN TIME (MENIT)
+        $options->setColumnWidth(24, 6); // UPTIME (MENIT)
+        $options->setColumnWidth(20, 7); // KOEFISIEN
+        $options->setColumnWidth(18, 8); // UPTIME (%)
 
-            fputcsv($handle, ["LAPORAN SLA ATM {$vendorName} BULAN {$monthName} {$year}"]);
-            fputcsv($handle, []);
-            fputcsv($handle, [
-                'No',
-                'Profil ATM',
-                'CABANG/KCP/KAS',
-                'Lokasi',
-                'DOWN TIME (MENIT)',
-                'UPTIME (MENIT)',
-                'KOEFISIEN',
-                'UPTIME (%)',
-                'Total Tiket',
+        // Merge Baris 1 (A1:H1) untuk Judul Laporan
+        $options->mergeCells(0, 1, 7, 1);
+
+        if ($rowCount > 0) {
+            // Merge Baris Summary A:D
+            $summaryRowIndex = $rowCount + 3;
+            $options->mergeCells(0, $summaryRowIndex, 3, $summaryRowIndex);
+        }
+
+        $tempFilePath = tempnam(sys_get_temp_dir(), 'sla_report_').'.xlsx';
+
+        $writer = new Writer($options);
+        $writer->openToFile($tempFilePath);
+
+        $border = new Border(
+            new BorderPart(Border::TOP, Color::BLACK, Border::WIDTH_THIN, Border::STYLE_SOLID),
+            new BorderPart(Border::BOTTOM, Color::BLACK, Border::WIDTH_THIN, Border::STYLE_SOLID),
+            new BorderPart(Border::LEFT, Color::BLACK, Border::WIDTH_THIN, Border::STYLE_SOLID),
+            new BorderPart(Border::RIGHT, Color::BLACK, Border::WIDTH_THIN, Border::STYLE_SOLID)
+        );
+
+        $titleStyle = (new Style)
+            ->setFontBold()
+            ->setFontSize(12)
+            ->setBackgroundColor('A6A6A6')
+            ->setCellAlignment(CellAlignment::CENTER)
+            ->setCellVerticalAlignment(CellVerticalAlignment::CENTER)
+            ->setBorder($border);
+
+        $headerStyle = (new Style)
+            ->setFontBold()
+            ->setFontSize(11)
+            ->setBackgroundColor('A6A6A6')
+            ->setCellAlignment(CellAlignment::CENTER)
+            ->setCellVerticalAlignment(CellVerticalAlignment::CENTER)
+            ->setShouldWrapText(true)
+            ->setBorder($border);
+
+        $centerStyle = (new Style)
+            ->setFontSize(11)
+            ->setCellAlignment(CellAlignment::CENTER)
+            ->setCellVerticalAlignment(CellVerticalAlignment::CENTER)
+            ->setBorder($border);
+
+        $leftStyle = (new Style)
+            ->setFontSize(11)
+            ->setCellAlignment(CellAlignment::LEFT)
+            ->setCellVerticalAlignment(CellVerticalAlignment::CENTER)
+            ->setShouldWrapText(true)
+            ->setBorder($border);
+
+        $rightNumericStyle = (new Style)
+            ->setFontSize(11)
+            ->setFormat('#,##0')
+            ->setCellAlignment(CellAlignment::RIGHT)
+            ->setCellVerticalAlignment(CellVerticalAlignment::CENTER)
+            ->setBorder($border);
+
+        $greenRightNumericStyle = (new Style)
+            ->setFontSize(11)
+            ->setBackgroundColor('92D050')
+            ->setFormat('#,##0')
+            ->setCellAlignment(CellAlignment::RIGHT)
+            ->setCellVerticalAlignment(CellVerticalAlignment::CENTER)
+            ->setBorder($border);
+
+        $greenCenterStyle = (new Style)
+            ->setFontSize(11)
+            ->setBackgroundColor('92D050')
+            ->setCellAlignment(CellAlignment::CENTER)
+            ->setCellVerticalAlignment(CellVerticalAlignment::CENTER)
+            ->setBorder($border);
+
+        $summaryLeftStyle = (new Style)
+            ->setFontBold()
+            ->setFontSize(11)
+            ->setBackgroundColor('A6A6A6')
+            ->setCellAlignment(CellAlignment::LEFT)
+            ->setCellVerticalAlignment(CellVerticalAlignment::CENTER)
+            ->setShouldWrapText(true)
+            ->setBorder($border);
+
+        $summaryRightNumericStyle = (new Style)
+            ->setFontBold()
+            ->setFontSize(11)
+            ->setBackgroundColor('A6A6A6')
+            ->setFormat('#,##0')
+            ->setCellAlignment(CellAlignment::RIGHT)
+            ->setCellVerticalAlignment(CellVerticalAlignment::CENTER)
+            ->setBorder($border);
+
+        $summaryCenterStyle = (new Style)
+            ->setFontBold()
+            ->setFontSize(11)
+            ->setBackgroundColor('A6A6A6')
+            ->setCellAlignment(CellAlignment::CENTER)
+            ->setCellVerticalAlignment(CellVerticalAlignment::CENTER)
+            ->setBorder($border);
+
+        // Baris 1: Judul Laporan
+        $title = "LAPORAN SLA ATM {$vendorName} BULAN {$monthName} {$year}";
+        $titleRow = new Row([
+            Cell::fromValue($title, $titleStyle),
+            Cell::fromValue('', $titleStyle),
+            Cell::fromValue('', $titleStyle),
+            Cell::fromValue('', $titleStyle),
+            Cell::fromValue('', $titleStyle),
+            Cell::fromValue('', $titleStyle),
+            Cell::fromValue('', $titleStyle),
+            Cell::fromValue('', $titleStyle),
+        ]);
+        $titleRow->setHeight(34);
+        $writer->addRow($titleRow);
+
+        // Baris 2: Header Kolom
+        $headerRow = new Row([
+            Cell::fromValue('No', $headerStyle),
+            Cell::fromValue('Profil ATM', $headerStyle),
+            Cell::fromValue('CABANG/KCP/KAS', $headerStyle),
+            Cell::fromValue('LOKASI', $headerStyle),
+            Cell::fromValue("DOWN TIME\n(MENIT)", $headerStyle),
+            Cell::fromValue("UPTIME\n(MENIT)", $headerStyle),
+            Cell::fromValue('KOEFISIEN', $headerStyle),
+            Cell::fromValue("UPTIME\n(%)", $headerStyle),
+        ]);
+        $headerRow->setHeight(30);
+        $writer->addRow($headerRow);
+
+        // Baris Data Mesin ATM
+        foreach ($data['rows'] as $row) {
+            $pct = $row['uptime_persen'];
+            $pctDisplay = ((float) $pct == (int) $pct) ? (int) $pct : $pct;
+
+            $dataRow = new Row([
+                Cell::fromValue($row['no'], $centerStyle),
+                Cell::fromValue($row['profil'], $leftStyle),
+                Cell::fromValue($row['cabang'], $leftStyle),
+                Cell::fromValue($row['lokasi'], $leftStyle),
+                $row['downtime_menit'] == 0
+                    ? Cell::fromValue('-', $greenCenterStyle)
+                    : Cell::fromValue((int) $row['downtime_menit'], $greenRightNumericStyle),
+                Cell::fromValue((int) $row['uptime_menit'], $greenRightNumericStyle),
+                Cell::fromValue((int) $row['koefisien'], $rightNumericStyle),
+                Cell::fromValue($pctDisplay, $centerStyle),
             ]);
+            $dataRow->setHeight(24);
+            $writer->addRow($dataRow);
+        }
 
-            foreach ($data['rows'] as $row) {
-                fputcsv($handle, [
-                    $row['no'],
-                    $row['profil'],
-                    $row['cabang'],
-                    $row['lokasi'],
-                    $row['downtime_menit'],
-                    $row['uptime_menit'],
-                    $row['koefisien'],
-                    $row['uptime_persen'],
-                    $row['tiket_count'],
-                ]);
-            }
-
-            fputcsv($handle, []);
-            fputcsv($handle, [
-                'SLA RATA-RATA VENDOR',
-                '',
-                '',
-                '',
-                $data['total_downtime'],
-                $data['total_uptime_menit'],
-                '',
-                $data['average_sla'].'%',
-                '',
+        // Baris Summary / Rata-rata
+        if ($rowCount > 0) {
+            $summaryRow = new Row([
+                Cell::fromValue('SLA RATA-RATA VENDOR', $summaryLeftStyle),
+                Cell::fromValue('', $summaryLeftStyle),
+                Cell::fromValue('', $summaryLeftStyle),
+                Cell::fromValue('', $summaryLeftStyle),
+                Cell::fromValue((int) $data['total_downtime'], $summaryRightNumericStyle),
+                Cell::fromValue((int) $data['total_uptime_menit'], $summaryRightNumericStyle),
+                Cell::fromValue('', $summaryCenterStyle),
+                Cell::fromValue($data['average_sla'].'%', $summaryCenterStyle),
             ]);
+            $summaryRow->setHeight(28);
+            $writer->addRow($summaryRow);
+        }
 
-            fclose($handle);
-        }, 200, $headers);
+        $writer->close();
+
+        return response()->download(
+            $tempFilePath,
+            $fileName,
+            [
+                'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            ]
+        )->deleteFileAfterSend(true);
+    }
+
+    public function exportCsv(): BinaryFileResponse
+    {
+        return $this->exportExcel();
     }
 }

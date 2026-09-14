@@ -11,6 +11,7 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DateTimePicker;
+use Filament\Support\Enums\Size;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
@@ -167,12 +168,21 @@ class TiketsTable
                             );
                     }),
             ])
+            ->recordActionsColumnLabel('Aksi')
+            ->recordActionsAlignment('center')
             ->actions([
                 Action::make('closeTicket')
                     ->label('Tutup Tiket')
                     ->icon('heroicon-m-check-circle')
                     ->color('success')
-                    ->visible(fn (Tiket $record): bool => $record->status === 'Open')
+                    ->button()
+                    ->size(Size::ExtraSmall)
+                    ->disabled(fn (Tiket $record): bool => $record->status !== 'Open')
+                    ->extraAttributes(fn (Tiket $record): array => $record->status === 'Open' ? [] : [
+                        'class' => 'invisible pointer-events-none select-none',
+                        'tabindex' => '-1',
+                        'aria-hidden' => 'true',
+                    ])
                     ->form([
                         DateTimePicker::make('selesai')
                             ->label('Waktu Selesai (Closed)')
@@ -180,14 +190,35 @@ class TiketsTable
                             ->default(now()),
                     ])
                     ->action(function (Tiket $record, array $data): void {
+                        if ($record->status !== 'Open') {
+                            return;
+                        }
+
                         $record->selesai = $data['selesai'];
                         $record->status = 'Closed';
                         $record->save();
                     }),
 
-                ViewAction::make(),
-                EditAction::make(),
-                DeleteAction::make(),
+                ViewAction::make()
+                    ->label('Lihat')
+                    ->icon('heroicon-m-eye')
+                    ->color('gray')
+                    ->button()
+                    ->size(Size::ExtraSmall),
+
+                EditAction::make()
+                    ->label('Ubah')
+                    ->icon('heroicon-m-pencil-square')
+                    ->color('primary')
+                    ->button()
+                    ->size(Size::ExtraSmall),
+
+                DeleteAction::make()
+                    ->label('Hapus')
+                    ->icon('heroicon-m-trash')
+                    ->color('danger')
+                    ->button()
+                    ->size(Size::ExtraSmall),
             ])
             ->bulkActions([
                 BulkActionGroup::make([

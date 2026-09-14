@@ -28,6 +28,9 @@ class LaporanSlaBulananTest extends TestCase
 
         $response->assertSuccessful();
         $response->assertSee('Laporan Service Level Agreement (SLA)');
+        $response->assertSee('Unduh Excel');
+        $response->assertDontSee('Cetak Laporan');
+        $response->assertDontSee('Muh. Abduh Bundung');
     }
 
     public function test_sla_report_livewire_component_renders_and_interacts(): void
@@ -49,7 +52,22 @@ class LaporanSlaBulananTest extends TestCase
             ->assertSet('search', '')
             ->call('resetFilters')
             ->assertSet('search', '')
-            ->call('exportCsv')
+            ->call('exportExcel')
             ->assertFileDownloaded();
+    }
+
+    public function test_export_csv_alias_downloads_excel_file(): void
+    {
+        $user = User::factory()->create();
+        $vendor = Vendor::create(['nama_vendor' => 'VENDOR_TEST']);
+
+        $this->actingAs($user);
+
+        Livewire::test(LaporanSlaBulanan::class)
+            ->set('vendor_id', (string) $vendor->id)
+            ->set('bulan', '06')
+            ->set('tahun', '2025')
+            ->call('exportCsv')
+            ->assertFileDownloaded('Laporan_SLA_VENDOR_TEST_JUNI_2025.xlsx');
     }
 }

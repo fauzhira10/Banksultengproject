@@ -3,8 +3,10 @@
 namespace Tests\Feature;
 
 use App\Filament\Resources\Tikets\Pages\CreateTiket;
+use App\Filament\Resources\Tikets\Pages\ListTikets;
 use App\Models\Cabang;
 use App\Models\Terminal;
+use App\Models\Tiket;
 use App\Models\User;
 use App\Models\Vendor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -113,5 +115,61 @@ class TiketFormTest extends TestCase
             'durasi_jam_menit' => '252:00',
             'durasi_menit' => 15120,
         ]);
+    }
+
+    public function test_list_tikets_displays_aksi_column_and_button_actions(): void
+    {
+        $user = User::factory()->create();
+        $cabang = Cabang::create([
+            'kode_cabang' => '001',
+            'nama_cabang' => 'KCU Palu',
+            'label_cabang' => '001-KCU Palu',
+        ]);
+        $vendor = Vendor::create(['nama_vendor' => 'SRISHINDU']);
+        $terminal = Terminal::create([
+            'profil' => 'WCR.KCU1',
+            'nama_lokasi' => 'Galeri ATM Kantor Pusat',
+            'cabang_id' => $cabang->id,
+            'vendor_id' => $vendor->id,
+            'kategori' => 'ATM',
+            'tipe_mesin' => 'Wincor 280',
+            'denom' => '100',
+            'status' => 'Aktif',
+        ]);
+
+        $tiket = Tiket::create([
+            'terminal_id' => $terminal->id,
+            'nomor_tiket' => 'TKT-TEST-001',
+            'kategori_problem' => 'Mesin ATM',
+            'permasalahan' => 'DISPENSER ERROR',
+            'mulai' => now()->subHour(),
+            'status' => 'Open',
+        ]);
+
+        $tiketClosed = Tiket::create([
+            'terminal_id' => $terminal->id,
+            'nomor_tiket' => 'TKT-TEST-002',
+            'kategori_problem' => 'Mesin ATM',
+            'permasalahan' => 'CARD READER ERROR',
+            'mulai' => now()->subHours(2),
+            'selesai' => now()->subHour(),
+            'status' => 'Closed',
+        ]);
+
+        $this->actingAs($user);
+
+        $test = Livewire::test(ListTikets::class);
+
+        $test->assertSuccessful();
+        $test->assertSee('Aksi');
+        $test->assertSee('Tutup Tiket');
+        $test->assertSee('Lihat');
+        $test->assertSee('Ubah');
+        $test->assertSee('Hapus');
+
+        $html = $test->html();
+        $this->assertStringContainsString('fi-btn', $html);
+        $this->assertStringContainsString('fi-align-center', $html);
+        $this->assertStringContainsString('invisible pointer-events-none', $html);
     }
 }

@@ -80,4 +80,12 @@
     html.dark body.fi-body {
         background-color: #0d1322 !important;
     }
+
+    /* Header kolom aksi agar posisinya di tengah (center) */
+    th.fi-ta-header-cell.fi-align-end {
+        text-align: center !important;
+    }
+    th.fi-ta-header-cell.fi-align-end .fi-ta-header-cell-sort-btn {
+        justify-content: center !important;
+    }
 </style>

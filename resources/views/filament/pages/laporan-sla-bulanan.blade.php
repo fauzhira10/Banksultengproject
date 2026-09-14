@@ -118,35 +118,23 @@
                     </div>
                 </div>
 
-                <!-- Tombol Aksi Nyaman Ditekan (Tinggi 44px+, Kontras Jelas) -->
+                <!-- Tombol Aksi Unduh Excel Spreadsheet -->
                 <div class="flex flex-wrap items-center gap-3">
                     <button
                         type="button"
-                        onclick="window.print()"
-                        class="inline-flex min-h-[44px] items-center gap-2.5 rounded-xl border-2 border-slate-300 bg-white px-5 py-2.5 text-sm font-bold text-slate-800 shadow-sm transition-all hover:bg-slate-100 hover:border-slate-400 focus:outline-hidden focus:ring-3 focus:ring-blue-500/30 active:scale-95 cursor-pointer dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:hover:bg-slate-700"
-                        title="Cetak laporan ke kertas atau simpan PDF"
-                    >
-                        <svg class="h-5 w-5 text-slate-600 dark:text-slate-300" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0 1 10.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0 .229 2.523a1.125 1.125 0 0 1-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0 0 21 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 0 0-1.913-.247M6.34 18H5.25A2.25 2.25 0 0 1 3 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 0 1 1.913-.247m10.5 0a48.536 48.536 0 0 0-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.656l10.5 0Z" />
-                        </svg>
-                        <span>Cetak Laporan</span>
-                    </button>
-
-                    <button
-                        type="button"
-                        wire:click="exportCsv"
+                        wire:click="exportExcel"
                         wire:loading.attr="disabled"
                         class="inline-flex min-h-[44px] items-center gap-2.5 rounded-xl bg-emerald-700 px-5 py-2.5 text-sm font-bold text-white shadow-sm transition-all hover:bg-emerald-600 focus:outline-hidden focus:ring-3 focus:ring-emerald-500/40 active:scale-95 cursor-pointer disabled:opacity-50"
-                        title="Unduh seluruh baris data ke file spreadsheet Excel"
+                        title="Unduh seluruh baris data ke file spreadsheet Excel (.xlsx)"
                     >
-                        <svg wire:loading.remove wire:target="exportCsv" class="h-5 w-5 text-emerald-100" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor">
+                        <svg wire:loading.remove wire:target="exportExcel" class="h-5 w-5 text-emerald-100" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
                         </svg>
-                        <svg wire:loading wire:target="exportCsv" class="h-5 w-5 animate-spin text-white" fill="none" viewBox="0 0 24 24">
+                        <svg wire:loading wire:target="exportExcel" class="h-5 w-5 animate-spin text-white" fill="none" viewBox="0 0 24 24">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
-                        <span>Unduh Excel (CSV)</span>
+                        <span>Unduh Excel</span>
                     </button>
                 </div>
             </div>
@@ -602,39 +590,6 @@
                     </tfoot>
                 @endif
             </table>
-        </div>
-
-        <!-- Bagian Catatan Ketentuan & Pengesahan Pimpinan -->
-        <div class="border-t-2 border-slate-200 bg-slate-50/90 p-6 transition-colors dark:border-slate-800 dark:bg-slate-850 print-break-inside-avoid">
-            <div class="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between text-sm text-slate-700 dark:text-slate-300">
-                <!-- Catatan Teknis -->
-                <div class="space-y-1.5">
-                    <div class="font-extrabold text-slate-900 dark:text-white uppercase tracking-wider text-xs">
-                        Ketentuan Perhitungan SLA Bank Sulteng:
-                    </div>
-                    <div class="text-xs text-slate-700 dark:text-slate-300 font-medium">
-                        1. Koefisien operasional bulanan dihitung riil: <strong>{{ $daysCount }} hari × 24 jam × 60 menit = {{ number_format($koefisienMenit, 0, ',', '.') }} menit</strong>.
-                    </div>
-                    <div class="text-xs text-slate-700 dark:text-slate-300 font-medium">
-                        2. Rumus Uptime (%) = <code>((Koefisien - Down Time) / Koefisien) × 100%</code>.
-                    </div>
-                    <div class="text-xs text-slate-700 dark:text-slate-300 font-medium">
-                        3. Target SLA minimum yang disepakati bersama vendor mitra adalah sebesar <strong>≥ 95.00%</strong>.
-                    </div>
-                </div>
-
-                <!-- Blok Pengesahan Pimpinan -->
-                <div class="text-center sm:min-w-[260px] sm:pr-4">
-                    <div class="text-xs font-semibold text-slate-600 dark:text-slate-400">Palu, {{ now()->translatedFormat('d F Y') }}</div>
-                    <div class="mt-1.5 font-bold text-slate-900 dark:text-white">Mengetahui,</div>
-                    <div class="font-extrabold text-slate-900 dark:text-white text-base">Divisi Teknologi Informasi</div>
-                    <div class="h-16 flex items-center justify-center">
-                        <span class="text-xs italic text-slate-500 dark:text-slate-400 print-only">(Tanda Tangan & Cap Resmi)</span>
-                    </div>
-                    <div class="font-black text-slate-900 underline text-base dark:text-white">Muh. Abduh Bundung</div>
-                    <div class="text-xs font-bold text-slate-700 dark:text-slate-300">Pemimpin Divisi</div>
-                </div>
-            </div>
         </div>
     </div>
 </x-filament-panels::page>
