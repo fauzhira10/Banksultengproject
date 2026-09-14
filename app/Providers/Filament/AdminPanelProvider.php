@@ -3,6 +3,7 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Pages\Auth\Login;
+use App\Filament\Resources\Tikets\Pages\ListTikets;
 use Filament\Enums\ThemeMode;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -50,6 +51,24 @@ class AdminPanelProvider extends PanelProvider
             ->renderHook(
                 PanelsRenderHook::USER_MENU_BEFORE,
                 fn () => view('filament.hooks.topbar-theme-switcher'),
+            )
+            ->renderHook(
+                PanelsRenderHook::BODY_END,
+                fn () => view('filament.hooks.table-scroll-to-end'),
+                scopes: ListTikets::class,
+            )
+            ->renderHook(
+                PanelsRenderHook::SIMPLE_LAYOUT_START,
+                fn () => view('filament.hooks.login-header'),
+            )
+            ->renderHook(
+                PanelsRenderHook::SIMPLE_PAGE_START,
+                fn () => view('filament.hooks.login-logo'),
+                scopes: Login::class,
+            )
+            ->renderHook(
+                PanelsRenderHook::SIMPLE_LAYOUT_END,
+                fn () => view('filament.hooks.login-footer'),
             )
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')

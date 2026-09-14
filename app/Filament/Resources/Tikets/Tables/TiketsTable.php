@@ -129,6 +129,7 @@ class TiketsTable
                     ->sortable(),
             ])
             ->defaultSort('mulai', 'desc')
+            ->recordClasses(fn (Tiket $record): ?string => $record->status === 'Open' ? 'bs-tiket-row-open' : null)
             ->filters([
                 SelectFilter::make('status')
                     ->label('Status Tiket')

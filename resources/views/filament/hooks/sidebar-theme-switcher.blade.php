@@ -5,23 +5,9 @@
             this.theme = mode;
             localStorage.setItem('theme', mode);
             localStorage.setItem('theme_preference_v1', 'true');
+
+            {{-- Kelas `dark` & store Alpine diterapkan dengan transisi halus oleh handler di head-theme --}}
             window.dispatchEvent(new CustomEvent('theme-changed', { detail: mode }));
-
-            if (mode === 'dark') {
-                document.documentElement.classList.add('dark');
-            } else if (mode === 'light') {
-                document.documentElement.classList.remove('dark');
-            } else if (mode === 'system') {
-                if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-                    document.documentElement.classList.add('dark');
-                } else {
-                    document.documentElement.classList.remove('dark');
-                }
-            }
-
-            if (window.Alpine && window.Alpine.store('theme')) {
-                window.Alpine.store('theme', (mode === 'dark' || (mode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) ? 'dark' : 'light');
-            }
         },
         close() {}
     }"

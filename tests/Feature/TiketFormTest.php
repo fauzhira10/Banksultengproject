@@ -172,4 +172,52 @@ class TiketFormTest extends TestCase
         $this->assertStringContainsString('fi-align-center', $html);
         $this->assertStringContainsString('invisible pointer-events-none', $html);
     }
+
+    public function test_list_tikets_highlights_only_open_ticket_rows(): void
+    {
+        $user = User::factory()->create();
+        $cabang = Cabang::create([
+            'kode_cabang' => '001',
+            'nama_cabang' => 'KCU Palu',
+            'label_cabang' => '001-KCU Palu',
+        ]);
+        $vendor = Vendor::create(['nama_vendor' => 'SRISHINDU']);
+        $terminal = Terminal::create([
+            'profil' => 'WCR.KCU1',
+            'nama_lokasi' => 'Galeri ATM Kantor Pusat',
+            'cabang_id' => $cabang->id,
+            'vendor_id' => $vendor->id,
+            'kategori' => 'ATM',
+            'tipe_mesin' => 'Wincor 280',
+            'denom' => '100',
+            'status' => 'Aktif',
+        ]);
+
+        Tiket::create([
+            'terminal_id' => $terminal->id,
+            'nomor_tiket' => 'TKT-TEST-001',
+            'kategori_problem' => 'Mesin ATM',
+            'permasalahan' => 'DISPENSER ERROR',
+            'mulai' => now()->subHour(),
+            'status' => 'Open',
+        ]);
+
+        Tiket::create([
+            'terminal_id' => $terminal->id,
+            'nomor_tiket' => 'TKT-TEST-002',
+            'kategori_problem' => 'Mesin ATM',
+            'permasalahan' => 'CARD READER ERROR',
+            'mulai' => now()->subHours(2),
+            'selesai' => now()->subHour(),
+            'status' => 'Closed',
+        ]);
+
+        $this->actingAs($user);
+
+        $html = Livewire::test(ListTikets::class)
+            ->assertSuccessful()
+            ->html();
+
+        $this->assertSame(1, substr_count($html, 'bs-tiket-row-open'));
+    }
 }

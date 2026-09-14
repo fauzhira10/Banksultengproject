@@ -21,7 +21,88 @@
     })();
 </script>
 
+<script>
+    /**
+     * Transisi halus saat berganti tema Terang/Gelap.
+     *
+     * Semua tombol tema (topbar & menu user Filament) memicu event `theme-changed`.
+     * Event dicegat lebih dulu (capture), lalu perubahan kelas `dark` dijalankan di dalam
+     * View Transition API (crossfade GPU, tetap mulus walau tabel berisi banyak baris).
+     * Browser tanpa View Transition memakai fallback transisi warna CSS.
+     */
+    (function () {
+        const root = document.documentElement;
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+        const resolveTheme = (mode) => (mode === 'dark' || (mode === 'system' && prefersDark.matches)) ? 'dark' : 'light';
+
+        window.addEventListener('theme-changed', (event) => {
+            if (event.bsIsReplayed) {
+                return;
+            }
+
+            const mode = event.detail;
+            const isDark = resolveTheme(mode) === 'dark';
+
+            if (root.classList.contains('dark') === isDark) {
+                return;
+            }
+
+            event.stopImmediatePropagation();
+
+            const applyTheme = () => {
+                root.classList.toggle('dark', isDark);
+
+                const replayedEvent = new CustomEvent('theme-changed', { detail: mode });
+                replayedEvent.bsIsReplayed = true;
+                window.dispatchEvent(replayedEvent);
+
+                // Beri kesempatan Alpine menyelesaikan update reaktif sebelum snapshot baru diambil.
+                return new Promise((resolve) => setTimeout(resolve, 0));
+            };
+
+            if (prefersReducedMotion.matches) {
+                applyTheme();
+
+                return;
+            }
+
+            if (typeof document.startViewTransition === 'function') {
+                root.classList.add('bs-theme-view-transition');
+
+                document.startViewTransition(applyTheme).finished.finally(() => {
+                    root.classList.remove('bs-theme-view-transition');
+                });
+
+                return;
+            }
+
+            root.classList.add('bs-theme-fading');
+            applyTheme();
+            setTimeout(() => root.classList.remove('bs-theme-fading'), 450);
+        }, true);
+    })();
+</script>
+
 <style>
+    /* Transisi tema: crossfade halus (View Transition API) */
+    html.bs-theme-view-transition::view-transition-old(root),
+    html.bs-theme-view-transition::view-transition-new(root) {
+        animation-duration: 450ms;
+        animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Fallback untuk browser tanpa View Transition API */
+    html.bs-theme-fading *,
+    html.bs-theme-fading *::before,
+    html.bs-theme-fading *::after {
+        transition-property: background-color, border-color, color, fill, stroke, box-shadow, outline-color !important;
+        transition-duration: 400ms !important;
+        transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;
+        transition-delay: 0s !important;
+    }
+
     /* Light Mode: Sidebar lebih gelap sedikit dari konten */
     html:not(.dark) .fi-sidebar,
     html:not(.dark) #fi-main-sidebar {

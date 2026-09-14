@@ -6,11 +6,31 @@ use Filament\Auth\Pages\Login as BaseLogin;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Component;
 use Filament\Schemas\Schema;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Validation\ValidationException;
 use SensitiveParameter;
 
 class Login extends BaseLogin
 {
+    public function getHeading(): string|Htmlable|null
+    {
+        return 'Masuk ke Sistem';
+    }
+
+    public function getSubheading(): string|Htmlable|null
+    {
+        return 'Silakan masukkan username dan password Anda.';
+    }
+
+    /**
+     * Logo Bank Sulteng dirender lewat render hook `filament.hooks.login-logo`,
+     * sehingga logo teks bawaan panel tidak ditampilkan di halaman login.
+     */
+    public function hasLogo(): bool
+    {
+        return false;
+    }
+
     public function form(Schema $schema): Schema
     {
         return $schema
