@@ -11,7 +11,6 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DateTimePicker;
-use Filament\Forms\Components\Textarea;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
@@ -127,12 +126,6 @@ class TiketsTable
                         default => 'gray',
                     })
                     ->sortable(),
-
-                TextColumn::make('status_keterangan')
-                    ->label('Status Keterangan')
-                    ->wrap()
-                    ->placeholder('-')
-                    ->toggleable(),
             ])
             ->defaultSort('mulai', 'desc')
             ->filters([
@@ -185,14 +178,9 @@ class TiketsTable
                             ->label('Waktu Selesai (Closed)')
                             ->required()
                             ->default(now()),
-                        Textarea::make('status_keterangan')
-                            ->label('Status Keterangan')
-                            ->placeholder('Tuliskan keterangan status penyelesaian tiket...')
-                            ->rows(3),
                     ])
                     ->action(function (Tiket $record, array $data): void {
                         $record->selesai = $data['selesai'];
-                        $record->status_keterangan = $data['status_keterangan'] ?? null;
                         $record->status = 'Closed';
                         $record->save();
                     }),

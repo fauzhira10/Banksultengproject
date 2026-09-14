@@ -17,7 +17,7 @@ class TiketInfolist
                 Section::make('Informasi Tiket & Status')
                     ->icon('heroicon-o-ticket')
                     ->schema([
-                        Grid::make(3)->schema([
+                        Grid::make(2)->schema([
                             TextEntry::make('nomor_tiket')
                                 ->label('Nomor Tiket')
                                 ->badge()
@@ -32,10 +32,6 @@ class TiketInfolist
                                     'Closed' => 'success',
                                     default => 'gray',
                                 }),
-
-                            TextEntry::make('status_keterangan')
-                                ->label('Status Keterangan')
-                                ->placeholder('-'),
                         ]),
                     ]),
 

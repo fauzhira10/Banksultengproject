@@ -320,12 +320,13 @@ class TiketForm
                                 }),
                         ]),
 
-                    // 5. Status & Status Keterangan
-                    Section::make('Status & Keterangan')
+                    // 5. Status Tiket
+                    Section::make('Status Operasional Tiket')
+                        ->description('Status pengerjaan gangguan ATM')
                         ->icon('heroicon-o-ticket')
                         ->schema([
                             ToggleButtons::make('status')
-                                ->label('Status Tiket')
+                                ->label('Status Pengerjaan')
                                 ->options([
                                     'Open' => 'Open (Aktif)',
                                     'Closed' => 'Closed (Selesai)',
@@ -342,12 +343,6 @@ class TiketForm
                                 ->required()
                                 ->inline()
                                 ->live(),
-
-                            Textarea::make('status_keterangan')
-                                ->label('Status Keterangan')
-                                ->placeholder('Keterangan status (misal: Selesai ditangani vendor, menunggu sparepart, dsb)...')
-                                ->rows(3)
-                                ->helperText('Catatan status operasional tiket'),
                         ]),
                 ])->columnSpan(['lg' => 1]),
             ]);

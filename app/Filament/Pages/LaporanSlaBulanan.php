@@ -29,7 +29,7 @@ class LaporanSlaBulanan extends Page
 
     public string $vendor_id = '';
 
-    public int $koefisien = 43200;
+    public int $koefisien = 44640;
 
     public string $search = '';
 
@@ -46,6 +46,17 @@ class LaporanSlaBulanan extends Page
 
         $defaultVendor = Vendor::where('nama_vendor', 'SRISHINDU')->first() ?? Vendor::first();
         $this->vendor_id = (string) ($defaultVendor?->id ?? '');
+        $this->koefisien = $this->daysInMonth * 24 * 60;
+    }
+
+    public function updatedBulan(): void
+    {
+        $this->koefisien = $this->daysInMonth * 24 * 60;
+    }
+
+    public function updatedTahun(): void
+    {
+        $this->koefisien = $this->daysInMonth * 24 * 60;
     }
 
     public function resetFilters(): void
@@ -61,6 +72,8 @@ class LaporanSlaBulanan extends Page
             $this->bulan = date('m');
             $this->tahun = date('Y');
         }
+
+        $this->koefisien = $this->daysInMonth * 24 * 60;
     }
 
     public function clearSearch(): void
@@ -116,6 +129,19 @@ class LaporanSlaBulanan extends Page
         return $this->months[$this->bulan] ?? $this->bulan;
     }
 
+    public function getDaysInMonthProperty(): int
+    {
+        $month = max(1, min(12, (int) $this->bulan));
+        $year = (int) $this->tahun ?: (int) date('Y');
+
+        return Carbon::createFromDate($year, $month, 1)->daysInMonth;
+    }
+
+    public function getKoefisienProperty(): int
+    {
+        return $this->daysInMonth * 24 * 60;
+    }
+
     public function getReportDataProperty(): array
     {
         $query = Terminal::with(['cabang', 'vendor']);
@@ -138,11 +164,15 @@ class LaporanSlaBulanan extends Page
 
         $terminals = $query->orderBy('cabang_id')->orderBy('urutan_cabang')->get();
 
-        $monthInt = (int) $this->bulan;
-        $yearInt = (int) $this->tahun;
+        $monthInt = max(1, min(12, (int) $this->bulan));
+        $yearInt = (int) $this->tahun ?: (int) date('Y');
 
         $startOfMonth = Carbon::createFromDate($yearInt, $monthInt, 1)->startOfMonth();
         $endOfMonth = Carbon::createFromDate($yearInt, $monthInt, 1)->endOfMonth();
+        $daysInMonth = $startOfMonth->daysInMonth;
+        $koefisien = $daysInMonth * 24 * 60;
+        $this->koefisien = $koefisien;
+        $now = now();
 
         // Ambil seluruh tiket yang relevan pada rentang bulan ini
         $terminalIds = $terminals->pluck('id');
@@ -168,14 +198,77 @@ class LaporanSlaBulanan extends Page
 
         foreach ($terminals as $index => $terminal) {
             $terminalTikets = $tikets->get($terminal->id, collect());
-            $downTime = (int) $terminalTikets->sum('durasi_menit');
+
+            // Hitung interval downtime riil yang jatuh di bulan yang diobservasi
+            $intervals = [];
+            foreach ($terminalTikets as $tiket) {
+                if (! $tiket->mulai) {
+                    continue;
+                }
+
+                $tMulai = Carbon::parse($tiket->mulai);
+                $tSelesai = $tiket->selesai ? Carbon::parse($tiket->selesai) : null;
+
+                if ($tMulai->greaterThan($endOfMonth)) {
+                    continue;
+                }
+                if ($tSelesai && $tSelesai->lessThan($startOfMonth)) {
+                    continue;
+                }
+
+                // Potong batas awal dan batas akhir downtime di dalam bulan berjalan
+                $wStart = $tMulai->lessThan($startOfMonth) ? $startOfMonth->copy() : $tMulai->copy();
+
+                if ($tSelesai) {
+                    $wEnd = $tSelesai->greaterThan($endOfMonth) ? $endOfMonth->copy() : $tSelesai->copy();
+                } else {
+                    // Tiket masih Open
+                    if ($now->lessThan($startOfMonth)) {
+                        continue;
+                    }
+                    $wEnd = $now->lessThan($endOfMonth) ? $now->copy() : $endOfMonth->copy();
+                }
+
+                if ($wEnd->greaterThan($wStart)) {
+                    $intervals[] = [
+                        'start' => $wStart->timestamp,
+                        'end' => $wEnd->timestamp,
+                    ];
+                }
+            }
+
+            if (empty($intervals)) {
+                $downTime = 0;
+            } else {
+                // Urutkan dan gabungkan interval gangguan yang overlap
+                usort($intervals, fn ($a, $b) => $a['start'] <=> $b['start']);
+                $merged = [];
+                $curr = $intervals[0];
+
+                for ($i = 1; $i < count($intervals); $i++) {
+                    if ($intervals[$i]['start'] <= $curr['end']) {
+                        $curr['end'] = max($curr['end'], $intervals[$i]['end']);
+                    } else {
+                        $merged[] = $curr;
+                        $curr = $intervals[$i];
+                    }
+                }
+                $merged[] = $curr;
+
+                $totalSecs = 0;
+                foreach ($merged as $item) {
+                    $totalSecs += ($item['end'] - $item['start']);
+                }
+                $downTime = (int) round($totalSecs / 60);
+                $downTime = min($downTime, $koefisien);
+            }
 
             if ($downTime > 0) {
                 $problemCount++;
             }
 
-            $uptimeMenit = max(0, $this->koefisien - $downTime);
-            $uptimePersen = $this->koefisien > 0 ? round(($uptimeMenit / $this->koefisien) * 100, 2) : 100.0;
+            $uptimeMenit = max(0, $koefisien - $downTime);
+            $uptimePersen = $koefisien > 0 ? round(($uptimeMenit / $koefisien) * 100, 2) : 100.0;
 
             $totalDownTime += $downTime;
             $totalUptimeMenit += $uptimeMenit;
@@ -193,7 +286,7 @@ class LaporanSlaBulanan extends Page
                 'vendor' => $terminal->vendor?->nama_vendor ?? '-',
                 'downtime_menit' => $downTime,
                 'uptime_menit' => $uptimeMenit,
-                'koefisien' => $this->koefisien,
+                'koefisien' => $koefisien,
                 'uptime_persen' => $uptimePersen,
                 'tiket_count' => $terminalTikets->count(),
             ];
@@ -210,6 +303,8 @@ class LaporanSlaBulanan extends Page
             'total_downtime' => $totalDownTime,
             'total_uptime_menit' => $totalUptimeMenit,
             'average_sla' => $averageSla,
+            'days_in_month' => $daysInMonth,
+            'koefisien' => $koefisien,
         ];
     }
 
