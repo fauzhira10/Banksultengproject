@@ -142,6 +142,8 @@ class TerminalsTable
 
                 TrashedFilter::make(),
             ], layout: FiltersLayout::Modal)
+            ->persistFiltersInSession()
+            ->persistSearchInSession()
             ->filtersFormColumns(2)
             ->filtersTriggerAction(
                 fn (Action $action) => $action

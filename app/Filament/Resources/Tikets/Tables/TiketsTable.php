@@ -136,6 +136,8 @@ class TiketsTable
                     ->sortable(),
             ])
             ->defaultSort('mulai', 'desc')
+            ->persistFiltersInSession()
+            ->persistSearchInSession()
             ->recordClasses(fn (Tiket $record): ?string => $record->status === 'Open' ? 'bs-tiket-row-open' : null)
             ->recordUrl(fn (Tiket $record): string => TiketResource::getUrl('view', ['record' => $record]))
             ->filters([

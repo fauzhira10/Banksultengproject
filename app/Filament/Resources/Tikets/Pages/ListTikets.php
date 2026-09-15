@@ -52,4 +52,23 @@ class ListTikets extends ListRecords
                 ->modifyQueryUsing(fn (Builder $query) => $query->whereIn('kategori_problem', ['Jaringan', 'Listrik', 'System'])),
         ];
     }
+
+    public function getDefaultActiveTab(): string|int|null
+    {
+        $sessionTab = session('tikets_active_tab');
+        if (filled($sessionTab) && array_key_exists($sessionTab, $this->getCachedTabs())) {
+            return $sessionTab;
+        }
+
+        return parent::getDefaultActiveTab();
+    }
+
+    public function updatedActiveTab(): void
+    {
+        parent::updatedActiveTab();
+
+        if (filled($this->activeTab)) {
+            session(['tikets_active_tab' => $this->activeTab]);
+        }
+    }
 }

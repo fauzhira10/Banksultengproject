@@ -152,4 +152,23 @@ class ListTerminals extends ListRecords
                 ->modifyQueryUsing(fn (Builder $query) => $query->where('is_hibah', true)),
         ];
     }
+
+    public function getDefaultActiveTab(): string|int|null
+    {
+        $sessionTab = session('terminals_active_tab');
+        if (filled($sessionTab) && array_key_exists($sessionTab, $this->getCachedTabs())) {
+            return $sessionTab;
+        }
+
+        return parent::getDefaultActiveTab();
+    }
+
+    public function updatedActiveTab(): void
+    {
+        parent::updatedActiveTab();
+
+        if (filled($this->activeTab)) {
+            session(['terminals_active_tab' => $this->activeTab]);
+        }
+    }
 }

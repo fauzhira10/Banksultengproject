@@ -35,7 +35,7 @@ class AppServiceProvider extends ServiceProvider
 
         Event::listen(
             Login::class,
-            fn () => session()->forget('sla_selected_vendor_id')
+            fn () => LoginResponse::resetSessionHistory()
         );
     }
 
