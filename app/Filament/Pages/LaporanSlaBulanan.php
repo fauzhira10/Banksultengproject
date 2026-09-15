@@ -333,22 +333,24 @@ class LaporanSlaBulanan extends Page
         $rowCount = count($data['rows']);
 
         $options = new Options;
-        $options->setColumnWidth(10, 1); // No
-        $options->setColumnWidth(22, 2); // Profil ATM
-        $options->setColumnWidth(32, 3); // CABANG/KCP/KAS
-        $options->setColumnWidth(48, 4); // LOKASI
-        $options->setColumnWidth(24, 5); // DOWN TIME (MENIT)
-        $options->setColumnWidth(24, 6); // UPTIME (MENIT)
-        $options->setColumnWidth(20, 7); // KOEFISIEN
-        $options->setColumnWidth(18, 8); // UPTIME (%)
+        $options->setColumnWidth(6, 1);  // Col A: No
+        $options->setColumnWidth(18, 2); // Col B: Profil ATM
+        $options->setColumnWidth(22, 3); // Col C: CABANG/KCP/KAS
+        $options->setColumnWidth(38, 4); // Col D: LOKASI
+        $options->setColumnWidth(24, 5); // Col E: DOWN TIME (DLM MENIT)
+        $options->setColumnWidth(12, 6); // Col F: UPTIME (MENIT)
+        $options->setColumnWidth(12, 7); // Col G: KOEFISIEN
+        $options->setColumnWidth(16, 8); // Col H: UPTIME (PERSEN)
 
-        // Merge Baris 1 (A1:H1) untuk Judul Laporan
+        // Merge Baris 1 (A1:H1) untuk Judul Laporan Utama
         $options->mergeCells(0, 1, 7, 1);
 
         if ($rowCount > 0) {
-            // Merge Baris Summary A:D
             $summaryRowIndex = $rowCount + 3;
-            $options->mergeCells(0, $summaryRowIndex, 3, $summaryRowIndex);
+            // Merge Summary: Kolom B:D untuk label "SLA"
+            $options->mergeCells(1, $summaryRowIndex, 3, $summaryRowIndex);
+            // Merge Summary: Kolom E:G untuk total downtime
+            $options->mergeCells(4, $summaryRowIndex, 6, $summaryRowIndex);
         }
 
         $tempFilePath = tempnam(sys_get_temp_dir(), 'sla_report_').'.xlsx';
@@ -363,85 +365,111 @@ class LaporanSlaBulanan extends Page
             new BorderPart(Border::RIGHT, Color::BLACK, Border::WIDTH_THIN, Border::STYLE_SOLID)
         );
 
+        // 1. Style Judul Utama (Row 1) - Biru Lembut #B8CCE4
         $titleStyle = (new Style)
             ->setFontBold()
-            ->setFontSize(12)
-            ->setBackgroundColor('A6A6A6')
+            ->setFontSize(11)
+            ->setBackgroundColor('B8CCE4')
             ->setCellAlignment(CellAlignment::CENTER)
             ->setCellVerticalAlignment(CellVerticalAlignment::CENTER)
             ->setBorder($border);
 
-        $headerStyle = (new Style)
+        // 2. Style Header Kolom Kiri (A-D) - Biru Lembut #B8CCE4
+        $headerBlueCenterStyle = (new Style)
             ->setFontBold()
-            ->setFontSize(11)
-            ->setBackgroundColor('A6A6A6')
+            ->setFontSize(10)
+            ->setBackgroundColor('B8CCE4')
             ->setCellAlignment(CellAlignment::CENTER)
             ->setCellVerticalAlignment(CellVerticalAlignment::CENTER)
-            ->setShouldWrapText(true)
             ->setBorder($border);
 
+        $headerBlueLeftStyle = (new Style)
+            ->setFontBold()
+            ->setFontSize(10)
+            ->setBackgroundColor('B8CCE4')
+            ->setCellAlignment(CellAlignment::LEFT)
+            ->setCellVerticalAlignment(CellVerticalAlignment::CENTER)
+            ->setBorder($border);
+
+        // 3. Style Header Kolom Kanan / Metrik (E-H) - Ungu Muda / Lilac #CCC0DA
+        $headerPurpleCenterStyle = (new Style)
+            ->setFontBold()
+            ->setFontSize(10)
+            ->setBackgroundColor('CCC0DA')
+            ->setCellAlignment(CellAlignment::CENTER)
+            ->setCellVerticalAlignment(CellVerticalAlignment::CENTER)
+            ->setBorder($border);
+
+        // 4. Style Baris Data Normal
         $centerStyle = (new Style)
-            ->setFontSize(11)
+            ->setFontSize(10)
             ->setCellAlignment(CellAlignment::CENTER)
             ->setCellVerticalAlignment(CellVerticalAlignment::CENTER)
             ->setBorder($border);
 
         $leftStyle = (new Style)
-            ->setFontSize(11)
+            ->setFontSize(10)
             ->setCellAlignment(CellAlignment::LEFT)
             ->setCellVerticalAlignment(CellVerticalAlignment::CENTER)
             ->setShouldWrapText(true)
             ->setBorder($border);
 
         $rightNumericStyle = (new Style)
-            ->setFontSize(11)
+            ->setFontSize(10)
             ->setFormat('#,##0')
             ->setCellAlignment(CellAlignment::RIGHT)
             ->setCellVerticalAlignment(CellVerticalAlignment::CENTER)
             ->setBorder($border);
 
-        $greenRightNumericStyle = (new Style)
-            ->setFontSize(11)
-            ->setBackgroundColor('92D050')
-            ->setFormat('#,##0')
-            ->setCellAlignment(CellAlignment::RIGHT)
-            ->setCellVerticalAlignment(CellVerticalAlignment::CENTER)
-            ->setBorder($border);
-
+        // 5. Style Kolom Hijau (Downtime & Uptime Menit) - Hijau Segar #92D050
         $greenCenterStyle = (new Style)
-            ->setFontSize(11)
+            ->setFontSize(10)
             ->setBackgroundColor('92D050')
             ->setCellAlignment(CellAlignment::CENTER)
             ->setCellVerticalAlignment(CellVerticalAlignment::CENTER)
             ->setBorder($border);
 
-        $summaryLeftStyle = (new Style)
-            ->setFontBold()
-            ->setFontSize(11)
-            ->setBackgroundColor('A6A6A6')
+        $greenRightNumericStyle = (new Style)
+            ->setFontSize(10)
+            ->setBackgroundColor('92D050')
+            ->setFormat('#,##0')
+            ->setCellAlignment(CellAlignment::RIGHT)
+            ->setCellVerticalAlignment(CellVerticalAlignment::CENTER)
+            ->setBorder($border);
+
+        // 6. Style Khusus Mesin yang Mengalami Downtime - Merah Muda Lembut #F2DCDB
+        $pinkLeftStyle = (new Style)
+            ->setFontSize(10)
+            ->setBackgroundColor('F2DCDB')
             ->setCellAlignment(CellAlignment::LEFT)
             ->setCellVerticalAlignment(CellVerticalAlignment::CENTER)
             ->setShouldWrapText(true)
             ->setBorder($border);
 
-        $summaryRightNumericStyle = (new Style)
-            ->setFontBold()
+        // 7. Style Baris Ringkasan SLA (Bawah)
+        $summaryWhiteStyle = (new Style)
             ->setFontSize(11)
-            ->setBackgroundColor('A6A6A6')
-            ->setFormat('#,##0')
-            ->setCellAlignment(CellAlignment::RIGHT)
-            ->setCellVerticalAlignment(CellVerticalAlignment::CENTER)
-            ->setBorder($border);
-
-        $summaryCenterStyle = (new Style)
-            ->setFontBold()
-            ->setFontSize(11)
-            ->setBackgroundColor('A6A6A6')
             ->setCellAlignment(CellAlignment::CENTER)
             ->setCellVerticalAlignment(CellVerticalAlignment::CENTER)
             ->setBorder($border);
 
-        // Baris 1: Judul Laporan
+        $summaryBlueCenterStyle = (new Style)
+            ->setFontBold()
+            ->setFontSize(12)
+            ->setBackgroundColor('00B0F0')
+            ->setCellAlignment(CellAlignment::CENTER)
+            ->setCellVerticalAlignment(CellVerticalAlignment::CENTER)
+            ->setBorder($border);
+
+        $summaryRedRightStyle = (new Style)
+            ->setFontBold()
+            ->setFontSize(12)
+            ->setBackgroundColor('FF0000')
+            ->setCellAlignment(CellAlignment::RIGHT)
+            ->setCellVerticalAlignment(CellVerticalAlignment::CENTER)
+            ->setBorder($border);
+
+        // Baris 1: Judul Laporan Utama
         $title = "LAPORAN SLA ATM {$vendorName} BULAN {$monthName} {$year}";
         $titleRow = new Row([
             Cell::fromValue($title, $titleStyle),
@@ -453,57 +481,64 @@ class LaporanSlaBulanan extends Page
             Cell::fromValue('', $titleStyle),
             Cell::fromValue('', $titleStyle),
         ]);
-        $titleRow->setHeight(34);
+        $titleRow->setHeight(26);
         $writer->addRow($titleRow);
 
         // Baris 2: Header Kolom
         $headerRow = new Row([
-            Cell::fromValue('No', $headerStyle),
-            Cell::fromValue('Profil ATM', $headerStyle),
-            Cell::fromValue('CABANG/KCP/KAS', $headerStyle),
-            Cell::fromValue('LOKASI', $headerStyle),
-            Cell::fromValue("DOWN TIME\n(MENIT)", $headerStyle),
-            Cell::fromValue("UPTIME\n(MENIT)", $headerStyle),
-            Cell::fromValue('KOEFISIEN', $headerStyle),
-            Cell::fromValue("UPTIME\n(%)", $headerStyle),
+            Cell::fromValue('No', $headerBlueCenterStyle),
+            Cell::fromValue('Profil ATM', $headerBlueLeftStyle),
+            Cell::fromValue('CABANG/KCP/KAS', $headerBlueLeftStyle),
+            Cell::fromValue('', $headerBlueLeftStyle),
+            Cell::fromValue('DOWN TIME (DLM MENIT)', $headerPurpleCenterStyle),
+            Cell::fromValue('', $headerPurpleCenterStyle),
+            Cell::fromValue('KOEFISIEN', $headerPurpleCenterStyle),
+            Cell::fromValue('UPTIME (PERSEN)', $headerPurpleCenterStyle),
         ]);
-        $headerRow->setHeight(30);
+        $headerRow->setHeight(28);
         $writer->addRow($headerRow);
 
         // Baris Data Mesin ATM
         foreach ($data['rows'] as $row) {
+            $hasDowntime = (int) $row['downtime_menit'] > 0;
+            $infoStyle = $hasDowntime ? $pinkLeftStyle : $leftStyle;
+
             $pct = $row['uptime_persen'];
-            $pctDisplay = ((float) $pct == (int) $pct) ? (int) $pct : $pct;
+            $pctDisplay = ((float) $pct == (int) $pct) ? (int) $pct : round((float) $pct, 0);
 
             $dataRow = new Row([
                 Cell::fromValue($row['no'], $centerStyle),
-                Cell::fromValue($row['profil'], $leftStyle),
-                Cell::fromValue($row['cabang'], $leftStyle),
-                Cell::fromValue($row['lokasi'], $leftStyle),
+                Cell::fromValue($row['profil'], $infoStyle),
+                Cell::fromValue($row['cabang'], $infoStyle),
+                Cell::fromValue($row['lokasi'], $infoStyle),
                 $row['downtime_menit'] == 0
                     ? Cell::fromValue('-', $greenCenterStyle)
                     : Cell::fromValue((int) $row['downtime_menit'], $greenRightNumericStyle),
                 Cell::fromValue((int) $row['uptime_menit'], $greenRightNumericStyle),
                 Cell::fromValue((int) $row['koefisien'], $rightNumericStyle),
-                Cell::fromValue($pctDisplay, $centerStyle),
+                Cell::fromValue((int) $pctDisplay, $rightNumericStyle),
             ]);
-            $dataRow->setHeight(24);
+            $dataRow->setHeight(20);
             $writer->addRow($dataRow);
         }
 
-        // Baris Summary / Rata-rata
+        // Baris Ringkasan SLA (Bawah)
         if ($rowCount > 0) {
+            $totalDt = (int) $data['total_downtime'];
+            $totalDtDisplay = $totalDt > 0 ? number_format($totalDt, 0, ',', '.') : '0';
+            $slaAvgDisplay = number_format((float) $data['average_sla'], 2, ',', '.');
+
             $summaryRow = new Row([
-                Cell::fromValue('SLA RATA-RATA VENDOR', $summaryLeftStyle),
-                Cell::fromValue('', $summaryLeftStyle),
-                Cell::fromValue('', $summaryLeftStyle),
-                Cell::fromValue('', $summaryLeftStyle),
-                Cell::fromValue((int) $data['total_downtime'], $summaryRightNumericStyle),
-                Cell::fromValue((int) $data['total_uptime_menit'], $summaryRightNumericStyle),
-                Cell::fromValue('', $summaryCenterStyle),
-                Cell::fromValue($data['average_sla'].'%', $summaryCenterStyle),
+                Cell::fromValue('', $summaryWhiteStyle),
+                Cell::fromValue('SLA', $summaryBlueCenterStyle),
+                Cell::fromValue('', $summaryBlueCenterStyle),
+                Cell::fromValue('', $summaryBlueCenterStyle),
+                Cell::fromValue($totalDtDisplay, $summaryBlueCenterStyle),
+                Cell::fromValue('', $summaryBlueCenterStyle),
+                Cell::fromValue('', $summaryBlueCenterStyle),
+                Cell::fromValue($slaAvgDisplay, $summaryRedRightStyle),
             ]);
-            $summaryRow->setHeight(28);
+            $summaryRow->setHeight(26);
             $writer->addRow($summaryRow);
         }
 
