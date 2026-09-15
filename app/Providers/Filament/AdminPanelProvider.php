@@ -3,6 +3,7 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Pages\Auth\Login;
+use App\Filament\Resources\Terminals\Pages\ListTerminals;
 use App\Filament\Resources\Tikets\Pages\ListTikets;
 use App\Filament\Resources\Tikets\Pages\ViewTiket;
 use Filament\Enums\ThemeMode;
@@ -56,7 +57,10 @@ class AdminPanelProvider extends PanelProvider
             ->renderHook(
                 PanelsRenderHook::BODY_END,
                 fn () => view('filament.hooks.table-scroll-to-end'),
-                scopes: ListTikets::class,
+                scopes: [
+                    ListTikets::class,
+                    ListTerminals::class,
+                ],
             )
             ->renderHook(
                 PanelsRenderHook::PAGE_HEADER_HEADING_BEFORE,
