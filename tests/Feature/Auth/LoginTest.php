@@ -36,7 +36,7 @@ class LoginTest extends TestCase
             ])
             ->call('authenticate')
             ->assertHasNoFormErrors()
-            ->assertRedirect('/admin');
+            ->assertRedirect('/admin/tikets');
 
         $this->assertAuthenticatedAs($user);
     }
@@ -70,5 +70,26 @@ class LoginTest extends TestCase
             ->assertHasFormErrors(['username']);
 
         $this->assertGuest();
+    }
+
+    public function test_authenticated_user_visiting_admin_is_redirected_to_tikets(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)->get('/admin');
+
+        $response->assertRedirect('/admin/tikets');
+    }
+
+    public function test_dashboard_is_not_in_navigation_menu(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)->get('/admin/tikets');
+
+        $response->assertSuccessful();
+        $response->assertSee('Open / Closed Tiket ATM');
+        $response->assertDontSee('filament-panels::pages/dashboard.title');
+        $response->assertDontSee('Dashboard</span>', false);
     }
 }

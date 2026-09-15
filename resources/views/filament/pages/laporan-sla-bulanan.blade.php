@@ -141,45 +141,21 @@
         </div>
 
         <!-- 2. Pilihan Vendor Tab Navigasi Ramah Sentuhan -->
-        <div class="flex flex-wrap items-center justify-between gap-3">
-            <div class="flex flex-wrap items-center gap-2 rounded-2xl border-2 border-slate-200 bg-slate-100/90 p-2 dark:border-slate-800 dark:bg-slate-900/80">
-                <span class="px-3 text-xs font-black uppercase tracking-wider text-slate-600 dark:text-slate-400">Pilih Vendor:</span>
+        <div class="flex flex-wrap items-center gap-2 rounded-2xl border-2 border-slate-200 bg-slate-100/90 p-2 dark:border-slate-800 dark:bg-slate-900/80">
+            <span class="px-3 text-xs font-black uppercase tracking-wider text-slate-600 dark:text-slate-400">Pilih Vendor:</span>
 
+            @foreach ($this->vendors as $v)
                 <button
                     type="button"
-                    wire:click="$set('vendor_id', '')"
-                    class="inline-flex min-h-[38px] items-center gap-2 rounded-xl px-4 py-2 text-sm font-bold transition-all cursor-pointer {{ empty($vendor_id) ? 'bg-white text-blue-700 shadow-sm ring-1 ring-slate-900/10 dark:bg-slate-800 dark:text-blue-300' : 'text-slate-700 hover:text-slate-900 hover:bg-white/70 dark:text-slate-300 dark:hover:text-white' }}"
+                    wire:click="selectVendor('{{ $v->id }}')"
+                    class="inline-flex min-h-[38px] items-center gap-2 rounded-xl px-4 py-2 text-sm font-bold transition-all cursor-pointer {{ $vendor_id == (string)$v->id ? 'bg-white text-blue-700 shadow-sm ring-1 ring-slate-900/10 dark:bg-slate-800 dark:text-blue-300' : 'text-slate-700 hover:text-slate-900 hover:bg-white/70 dark:text-slate-300 dark:hover:text-white' }}"
                 >
-                    <span>Semua Vendor</span>
+                    <span>{{ $v->nama_vendor }}</span>
+                    <span class="rounded-lg px-2 py-0.5 text-xs font-black {{ $vendor_id == (string)$v->id ? 'bg-blue-100 text-blue-900 dark:bg-blue-950 dark:text-blue-200' : 'bg-slate-200 text-slate-800 dark:bg-slate-700 dark:text-slate-200' }}">
+                        {{ $v->terminals_count }} Unit
+                    </span>
                 </button>
-
-                @foreach ($this->vendors as $v)
-                    <button
-                        type="button"
-                        wire:click="$set('vendor_id', '{{ $v->id }}')"
-                        class="inline-flex min-h-[38px] items-center gap-2 rounded-xl px-4 py-2 text-sm font-bold transition-all cursor-pointer {{ $vendor_id == (string)$v->id ? 'bg-white text-blue-700 shadow-sm ring-1 ring-slate-900/10 dark:bg-slate-800 dark:text-blue-300' : 'text-slate-700 hover:text-slate-900 hover:bg-white/70 dark:text-slate-300 dark:hover:text-white' }}"
-                    >
-                        <span>{{ $v->nama_vendor }}</span>
-                        <span class="rounded-lg px-2 py-0.5 text-xs font-black {{ $vendor_id == (string)$v->id ? 'bg-blue-100 text-blue-900 dark:bg-blue-950 dark:text-blue-200' : 'bg-slate-200 text-slate-800 dark:bg-slate-700 dark:text-slate-200' }}">
-                            {{ $v->terminals_count }} Unit
-                        </span>
-                    </button>
-                @endforeach
-            </div>
-
-            @if(!empty($search) || !empty($vendor_id))
-                <button
-                    type="button"
-                    wire:click="resetFilters"
-                    class="inline-flex min-h-[38px] items-center gap-2 rounded-xl border-2 border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:border-slate-400 hover:text-slate-900 transition-colors cursor-pointer dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
-                    title="Kembalikan semua filter ke kondisi awal"
-                >
-                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
-                    </svg>
-                    <span>Reset Filter</span>
-                </button>
-            @endif
+            @endforeach
         </div>
 
         <!-- 3. Filter Bar (Bulan, Tahun, & Pencarian Berukuran Besar & Jelas) -->
@@ -561,13 +537,13 @@
                                     <p class="mt-1.5 text-sm text-slate-600 dark:text-slate-400 font-medium">
                                         Tidak ditemukan terminal untuk kriteria vendor atau kata kunci pencarian yang dimasukkan.
                                     </p>
-                                    @if(!empty($search) || !empty($vendor_id))
+                                    @if(!empty($search))
                                         <button
                                             type="button"
-                                            wire:click="resetFilters"
+                                            wire:click="clearSearch"
                                             class="mt-4 inline-flex min-h-[40px] items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-blue-500 cursor-pointer"
                                         >
-                                            Reset Filter Pencarian
+                                            Hapus Pencarian
                                         </button>
                                     @endif
                                 </div>

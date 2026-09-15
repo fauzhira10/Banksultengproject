@@ -54,9 +54,29 @@ class LaporanSlaBulanan extends Page
             $this->tahun = '2025';
         }
 
-        $defaultVendor = Vendor::where('nama_vendor', 'SRISHINDU')->first() ?? Vendor::first();
-        $this->vendor_id = (string) ($defaultVendor?->id ?? '');
+        // Restore filter vendor dari riwayat session jika ada dan valid
+        $sessionVendorId = session('sla_selected_vendor_id');
+        if (! empty($sessionVendorId) && Vendor::where('id', $sessionVendorId)->exists()) {
+            $this->vendor_id = (string) $sessionVendorId;
+        } else {
+            $firstVendor = Vendor::whereHas('terminals')->orderBy('nama_vendor')->first() ?? Vendor::first();
+            $this->vendor_id = (string) ($firstVendor?->id ?? '');
+        }
+
         $this->koefisien = $this->daysInMonth * 24 * 60;
+    }
+
+    public function selectVendor(string $id): void
+    {
+        $this->vendor_id = $id;
+        session(['sla_selected_vendor_id' => $id]);
+    }
+
+    public function updatedVendorId($value): void
+    {
+        if (! empty($value)) {
+            session(['sla_selected_vendor_id' => (string) $value]);
+        }
     }
 
     public function updatedBulan(): void
@@ -72,8 +92,8 @@ class LaporanSlaBulanan extends Page
     public function resetFilters(): void
     {
         $this->search = '';
-        $defaultVendor = Vendor::where('nama_vendor', 'SRISHINDU')->first() ?? Vendor::first();
-        $this->vendor_id = (string) ($defaultVendor?->id ?? '');
+        $firstVendor = Vendor::whereHas('terminals')->orderBy('nama_vendor')->first() ?? Vendor::first();
+        $this->vendor_id = (string) ($firstVendor?->id ?? '');
 
         if (Tiket::whereMonth('mulai', 1)->whereYear('mulai', 2025)->exists() && ! Tiket::whereMonth('mulai', (int) date('m'))->whereYear('mulai', (int) date('Y'))->exists()) {
             $this->bulan = '01';
@@ -99,10 +119,11 @@ class LaporanSlaBulanan extends Page
     public function getSelectedVendorNameProperty(): string
     {
         if (empty($this->vendor_id)) {
-            return 'SEMUA VENDOR';
+            $firstVendor = Vendor::whereHas('terminals')->orderBy('nama_vendor')->first() ?? Vendor::first();
+            $this->vendor_id = (string) ($firstVendor?->id ?? '');
         }
 
-        return $this->vendors->firstWhere('id', (int) $this->vendor_id)?->nama_vendor ?? 'SEMUA VENDOR';
+        return $this->vendors->firstWhere('id', (int) $this->vendor_id)?->nama_vendor ?? '-';
     }
 
     public function getMonthsProperty(): array
@@ -156,6 +177,11 @@ class LaporanSlaBulanan extends Page
     {
         $query = Terminal::with(['cabang:id,nama_cabang,label_cabang', 'vendor:id,nama_vendor'])
             ->select(['id', 'profil', 'cabang_id', 'cabang_text', 'urutan_cabang', 'nama_lokasi', 'luno', 'serial_number', 'tipe_mesin', 'vendor_id']);
+
+        if (empty($this->vendor_id)) {
+            $firstVendor = Vendor::whereHas('terminals')->orderBy('nama_vendor')->first() ?? Vendor::first();
+            $this->vendor_id = (string) ($firstVendor?->id ?? '');
+        }
 
         if (! empty($this->vendor_id)) {
             $query->where('vendor_id', $this->vendor_id);
