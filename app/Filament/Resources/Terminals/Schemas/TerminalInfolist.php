@@ -32,12 +32,6 @@ class TerminalInfolist
                             TextEntry::make('urutan_cabang')
                                 ->label('Nomor Urut Per Cabang')
                                 ->formatStateUsing(fn ($state) => $state ? "Unit ke-{$state}" : '-'),
-
-                            TextEntry::make('rek_ia')
-                                ->label('Nomor Rekening IA')
-                                ->placeholder('Belum diisi')
-                                ->columnSpan(2)
-                                ->copyable(),
                         ]),
                     ]),
 
@@ -102,16 +96,6 @@ class TerminalInfolist
                             TextEntry::make('vendor.nama_vendor')
                                 ->label('Vendor Maintenance')
                                 ->badge(),
-
-                            TextEntry::make('status')
-                                ->label('Status Operasional')
-                                ->badge()
-                                ->color(fn (string $state): string => match ($state) {
-                                    'Aktif' => 'success',
-                                    'Belum Digunakan' => 'warning',
-                                    'Di Gudang' => 'gray',
-                                    default => 'danger',
-                                }),
 
                             TextEntry::make('is_hibah')
                                 ->label('Status Hibah')

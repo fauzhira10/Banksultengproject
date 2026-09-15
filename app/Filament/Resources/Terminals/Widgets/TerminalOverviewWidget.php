@@ -10,10 +10,11 @@ class TerminalOverviewWidget extends StatsOverviewWidget
 {
     protected function getStats(): array
     {
-        $total = Terminal::count();
-        $crm = Terminal::crm()->count();
-        $atm = Terminal::atm()->count();
-        $hibah = Terminal::hibah()->count();
+        $counts = Terminal::getCountsSummary();
+        $total = $counts['total'];
+        $crm = $counts['crm'];
+        $atm = $counts['atm'];
+        $hibah = $counts['hibah'];
 
         return [
             Stat::make('Total Terminal', "{$total} Unit")

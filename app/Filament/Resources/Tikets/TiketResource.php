@@ -34,7 +34,7 @@ class TiketResource extends Resource
 
     public static function getNavigationBadge(): ?string
     {
-        $openCount = static::getModel()::where('status', 'Open')->count();
+        $openCount = Tiket::getCountsSummary()['open'];
 
         return $openCount > 0 ? (string) $openCount : null;
     }

@@ -32,7 +32,10 @@ class CabangResource extends Resource
 
     public static function getNavigationBadge(): ?string
     {
-        return (string) static::getModel()::count();
+        static $count = null;
+        $count ??= static::getModel()::count();
+
+        return (string) $count;
     }
 
     public static function form(Schema $schema): Schema

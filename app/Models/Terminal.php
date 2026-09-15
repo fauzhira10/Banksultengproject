@@ -28,8 +28,6 @@ class Terminal extends Model
         'tipe_mesin',
         'kategori',
         'is_hibah',
-        'rek_ia',
-        'status',
         'keterangan',
     ];
 
@@ -66,5 +64,35 @@ class Terminal extends Model
     public function scopeHibah(Builder $query): Builder
     {
         return $query->where('is_hibah', true);
+    }
+
+    /**
+     * Mengambil ringkasan jumlah data terminal dalam satu query agregat (memoized per-request).
+     *
+     * @return array{total: int, crm: int, atm: int, hibah: int}
+     */
+    public static function getCountsSummary(bool $fresh = false): array
+    {
+        static $cached = null;
+
+        if ($cached !== null && ! $fresh) {
+            return $cached;
+        }
+
+        $row = static::query()
+            ->selectRaw("
+                COUNT(*) as total,
+                SUM(CASE WHEN kategori = 'CRM' THEN 1 ELSE 0 END) as crm,
+                SUM(CASE WHEN kategori = 'ATM' THEN 1 ELSE 0 END) as atm,
+                SUM(CASE WHEN is_hibah = 1 THEN 1 ELSE 0 END) as hibah
+            ")
+            ->first();
+
+        return $cached = [
+            'total' => (int) ($row->total ?? 0),
+            'crm' => (int) ($row->crm ?? 0),
+            'atm' => (int) ($row->atm ?? 0),
+            'hibah' => (int) ($row->hibah ?? 0),
+        ];
     }
 }

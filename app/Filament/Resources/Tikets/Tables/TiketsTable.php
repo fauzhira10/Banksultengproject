@@ -15,6 +15,7 @@ use Filament\Actions\RestoreBulkAction;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Support\Enums\Size;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TrashedFilter;
@@ -26,6 +27,9 @@ class TiketsTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn (Builder $query) => $query->with('terminal'))
+            ->searchPlaceholder('Cari No Tiket, Masalah, Lokasi, ID/LUNO, Profil, Cabang...')
+            ->searchDebounce('400ms')
             ->columns([
                 TextColumn::make('nomor_tiket')
                     ->label('No Tiket')
@@ -157,6 +161,8 @@ class TiketsTable
                     ->searchable(),
 
                 Filter::make('rentang_waktu')
+                    ->columnSpan(2)
+                    ->columns(2)
                     ->form([
                         DateTimePicker::make('dari')->label('Mulai Dari'),
                         DateTimePicker::make('sampai')->label('Sampai Dengan'),
@@ -174,7 +180,15 @@ class TiketsTable
                     }),
 
                 TrashedFilter::make(),
-            ])
+            ], layout: FiltersLayout::Modal)
+            ->filtersFormColumns(2)
+            ->filtersTriggerAction(
+                fn (Action $action) => $action
+                    ->button()
+                    ->label('Filter Data')
+                    ->icon('heroicon-m-funnel')
+                    ->slideOver()
+            )
             ->recordActionsColumnLabel('Aksi')
             ->recordActionsAlignment('center')
             ->actions([

@@ -24,28 +24,30 @@ class ListTikets extends ListRecords
 
     public function getTabs(): array
     {
+        $counts = Tiket::getCountsSummary();
+
         return [
             'all' => Tab::make('Semua Tiket')
-                ->badge(Tiket::count())
+                ->badge($counts['total'])
                 ->badgeColor('primary'),
 
             'open' => Tab::make('Open (Dalam Proses)')
-                ->badge(Tiket::where('status', 'Open')->count())
+                ->badge($counts['open'])
                 ->badgeColor('warning')
                 ->modifyQueryUsing(fn (Builder $query) => $query->where('status', 'Open')),
 
             'closed' => Tab::make('Closed (Selesai)')
-                ->badge(Tiket::where('status', 'Closed')->count())
+                ->badge($counts['closed'])
                 ->badgeColor('success')
                 ->modifyQueryUsing(fn (Builder $query) => $query->where('status', 'Closed')),
 
             'mesin' => Tab::make('Problem Mesin ATM')
-                ->badge(Tiket::where('kategori_problem', 'Mesin ATM')->count())
+                ->badge($counts['mesin'])
                 ->badgeColor('info')
                 ->modifyQueryUsing(fn (Builder $query) => $query->where('kategori_problem', 'Mesin ATM')),
 
             'jaringan_listrik' => Tab::make('Jaringan / Listrik / System')
-                ->badge(Tiket::whereIn('kategori_problem', ['Jaringan', 'Listrik', 'System'])->count())
+                ->badge($counts['jaringan_listrik'])
                 ->badgeColor('gray')
                 ->modifyQueryUsing(fn (Builder $query) => $query->whereIn('kategori_problem', ['Jaringan', 'Listrik', 'System'])),
         ];

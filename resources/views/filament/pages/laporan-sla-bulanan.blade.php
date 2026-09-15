@@ -161,7 +161,7 @@
                     >
                         <span>{{ $v->nama_vendor }}</span>
                         <span class="rounded-lg px-2 py-0.5 text-xs font-black {{ $vendor_id == (string)$v->id ? 'bg-blue-100 text-blue-900 dark:bg-blue-950 dark:text-blue-200' : 'bg-slate-200 text-slate-800 dark:bg-slate-700 dark:text-slate-200' }}">
-                            {{ $v->terminals()->count() }} Unit
+                            {{ $v->terminals_count }} Unit
                         </span>
                     </button>
                 @endforeach
@@ -402,7 +402,18 @@
     </div>
 
     <!-- 5. Lembar Tabel Data SLA Modern & Ramah Lansia (Kontras Tinggi, Font Jelas, Zebra Striping) -->
-    <div class="print-container mt-6 overflow-hidden rounded-2xl border-2 border-slate-300 bg-white shadow-sm transition-colors dark:border-slate-800 dark:bg-slate-900">
+    <div class="print-container relative mt-6 overflow-hidden rounded-2xl border-2 border-slate-300 bg-white shadow-sm transition-colors dark:border-slate-800 dark:bg-slate-900">
+        <!-- Overlay Loading Saat Ganti Vendor / Filter / Bulan -->
+        <div wire:loading.delay.shorter wire:target="vendor_id,bulan,tahun,search,resetFilters" class="no-print absolute inset-0 z-20 flex items-center justify-center bg-white/70 backdrop-blur-[2px] transition-all dark:bg-slate-900/70">
+            <div class="inline-flex items-center gap-3 rounded-2xl bg-slate-900 px-5 py-3 text-sm font-bold text-white shadow-2xl ring-1 ring-white/20 dark:bg-slate-800">
+                <svg class="h-5 w-5 animate-spin text-blue-400" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>Menghitung Data SLA...</span>
+            </div>
+        </div>
+
         <!-- Subheader Tabel (Tampak Layar) -->
         <div class="no-print flex flex-col gap-2 border-b-2 border-slate-200 bg-slate-100/90 px-6 py-4 sm:flex-row sm:items-center sm:justify-between dark:border-slate-800 dark:bg-slate-800/80">
             <div>

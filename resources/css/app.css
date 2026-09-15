@@ -167,6 +167,23 @@ html.dark .fi-topbar {
 }
 
 /* ==========================================================================
+   Smooth Theme Transition: Fallback jika browser belum mendukung View Transitions
+   Diterapkan serentak ke semua elemen selama proses pergantian tema (300ms)
+   ========================================================================== */
+html.theme-transitioning,
+html.theme-transitioning *,
+html.theme-transitioning *::before,
+html.theme-transitioning *::after {
+    transition: background-color 300ms cubic-bezier(0.4, 0, 0.2, 1),
+                border-color 300ms cubic-bezier(0.4, 0, 0.2, 1),
+                color 300ms cubic-bezier(0.4, 0, 0.2, 1),
+                fill 300ms cubic-bezier(0.4, 0, 0.2, 1),
+                stroke 300ms cubic-bezier(0.4, 0, 0.2, 1),
+                box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+    transition-delay: 0s !important;
+}
+
+/* ==========================================================================
    Senior & Multi-Generational UI/UX Accessibility Enhancements (WCAG 2.2 AAA)
    Designed for all ages with high legibility, comfortable targets, & high contrast
    ========================================================================== */
@@ -556,3 +573,69 @@ html.dark .fi-simple-header-subheading {
 .fi-simple-main button[type="submit"]:active {
     transform: translateY(0) !important;
 }
+
+/* ==========================================================================
+   TABLE SEARCH & FILTER ENHANCEMENTS (Intuitive, High-Legibility, Senior-Friendly)
+   ========================================================================== */
+
+/* 1. Responsive & Comfortable Table Search Field */
+@media (min-width: 640px) {
+    .fi-ta-search-field {
+        min-width: 22rem !important;
+    }
+}
+
+.fi-ta-search-field .fi-input-wrp {
+    min-height: 2.625rem !important; /* 42px comfortable touch/click */
+    border-radius: 0.625rem !important;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out !important;
+}
+
+html:not(.dark) .fi-ta-search-field .fi-input-wrp {
+    background-color: #ffffff !important;
+    border: 1.5px solid #cbd5e1 !important;
+}
+
+html:not(.dark) .fi-ta-search-field .fi-input-wrp:focus-within {
+    border-color: #2563eb !important;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
+}
+
+html.dark .fi-ta-search-field .fi-input-wrp {
+    background-color: #0f172a !important;
+    border: 1.5px solid #334155 !important;
+}
+
+html.dark .fi-ta-search-field .fi-input-wrp:focus-within {
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25) !important;
+}
+
+/* 2. Filter Trigger Button Styling */
+.fi-ta-filters-trigger-btn,
+button[wire\:click*="openFilters"] {
+    font-weight: 600 !important;
+    border-radius: 0.625rem !important;
+    min-height: 2.625rem !important;
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+}
+
+/* 3. Active Filter Indicators (Chips/Badges) */
+.fi-ta-filter-indicators {
+    gap: 0.5rem !important;
+    margin-bottom: 0.75rem !important;
+    padding: 0.5rem 0.75rem !important;
+    border-radius: 0.75rem !important;
+}
+
+html:not(.dark) .fi-ta-filter-indicators {
+    background-color: #f1f5f9 !important;
+    border: 1px solid #e2e8f0 !important;
+}
+
+html.dark .fi-ta-filter-indicators {
+    background-color: #0f172a !important;
+    border: 1px solid #1e293b !important;
+}
+

@@ -3108,8 +3108,6 @@ JSON;
                     'tipe_mesin' => $item['tipe_mesin'],
                     'kategori' => $item['kategori'],
                     'is_hibah' => $item['is_hibah'],
-                    'rek_ia' => $item['rek_ia'],
-                    'status' => $item['status'],
                 ]
             );
         }

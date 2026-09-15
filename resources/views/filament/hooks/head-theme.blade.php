@@ -23,12 +23,8 @@
 
 <script>
     /**
-     * Transisi halus saat berganti tema Terang/Gelap.
-     *
-     * Semua tombol tema (topbar & menu user Filament) memicu event `theme-changed`.
-     * Event dicegat lebih dulu (capture), lalu perubahan kelas `dark` dijalankan di dalam
-     * View Transition API (crossfade GPU, tetap mulus walau tabel berisi banyak baris).
-     * Browser tanpa View Transition memakai fallback transisi warna CSS.
+     * Transisi tema yang sangat halus, elegan, dan mulus (silky smooth crossfade 300ms).
+     * Menggunakan View Transition API (GPU-accelerated) dengan fallback transisi menyeluruh.
      */
     (function () {
         const root = document.documentElement;
@@ -57,52 +53,87 @@
                 const replayedEvent = new CustomEvent('theme-changed', { detail: mode });
                 replayedEvent.bsIsReplayed = true;
                 window.dispatchEvent(replayedEvent);
-
-                // Beri kesempatan Alpine menyelesaikan update reaktif sebelum snapshot baru diambil.
-                return new Promise((resolve) => setTimeout(resolve, 0));
             };
 
             if (prefersReducedMotion.matches) {
                 applyTheme();
-
                 return;
             }
 
+            // Jalur 1: View Transitions API (GPU Accelerated Seamless Crossfade)
             if (typeof document.startViewTransition === 'function') {
-                root.classList.add('bs-theme-view-transition');
-
-                document.startViewTransition(applyTheme).finished.finally(() => {
-                    root.classList.remove('bs-theme-view-transition');
-                });
-
-                return;
+                try {
+                    document.startViewTransition(applyTheme);
+                    return;
+                } catch (e) {
+                    // Fallback jika startViewTransition gagal
+                }
             }
 
-            root.classList.add('bs-theme-fading');
+            // Jalur 2: Fallback halus menyeluruh untuk browser tanpa View Transitions API
+            root.classList.add('theme-transitioning');
             applyTheme();
-            setTimeout(() => root.classList.remove('bs-theme-fading'), 450);
+            setTimeout(() => {
+                root.classList.remove('theme-transitioning');
+            }, 320);
         }, true);
     })();
 </script>
 
 <style>
-    /* Transisi tema: crossfade halus (View Transition API) */
-    html.bs-theme-view-transition::view-transition-old(root),
-    html.bs-theme-view-transition::view-transition-new(root) {
-        animation-duration: 450ms;
+    /* ==========================================================================
+       1. View Transition API: Silky Smooth Seamless Crossfade (300ms)
+          Tampilan lama tetap solid di bawah, tampilan baru memudar halus di atasnya.
+       ========================================================================== */
+    ::view-transition-group(root) {
+        animation-duration: 300ms;
         animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    /* Fallback untuk browser tanpa View Transition API */
-    html.bs-theme-fading *,
-    html.bs-theme-fading *::before,
-    html.bs-theme-fading *::after {
-        transition-property: background-color, border-color, color, fill, stroke, box-shadow, outline-color !important;
-        transition-duration: 400ms !important;
-        transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;
+    ::view-transition-old(root),
+    ::view-transition-new(root) {
+        mix-blend-mode: normal;
+    }
+
+    ::view-transition-old(root) {
+        animation: none !important;
+        z-index: 1;
+    }
+
+    ::view-transition-new(root) {
+        animation: bs-theme-fade-in 300ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+        z-index: 2;
+    }
+
+    @keyframes bs-theme-fade-in {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+
+    /* ==========================================================================
+       2. Fallback Transisi Halus Menyeluruh (Browser tanpa View Transitions)
+          Diterapkan serentak ke semua elemen selama proses pergantian tema (300ms)
+       ========================================================================== */
+    html.theme-transitioning,
+    html.theme-transitioning *,
+    html.theme-transitioning *::before,
+    html.theme-transitioning *::after {
+        transition: background-color 300ms cubic-bezier(0.4, 0, 0.2, 1),
+                    border-color 300ms cubic-bezier(0.4, 0, 0.2, 1),
+                    color 300ms cubic-bezier(0.4, 0, 0.2, 1),
+                    fill 300ms cubic-bezier(0.4, 0, 0.2, 1),
+                    stroke 300ms cubic-bezier(0.4, 0, 0.2, 1),
+                    box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1) !important;
         transition-delay: 0s !important;
     }
 
+    /* ==========================================================================
+       3. Sidebar & Komponen Styling
+       ========================================================================== */
     /* Light Mode: Sidebar lebih gelap sedikit dari konten */
     html:not(.dark) .fi-sidebar,
     html:not(.dark) #fi-main-sidebar {

@@ -104,7 +104,7 @@ class TiketForm
                                 ->required()
                                 ->searchable()
                                 ->preload()
-                                ->relationship('terminal', 'profil')
+                                ->relationship('terminal', 'profil', modifyQueryUsing: fn ($query) => $query->with('cabang'))
                                 ->getOptionLabelFromRecordUsing(fn (Terminal $record): string => "{$record->profil} — {$record->nama_lokasi} (".($record->cabang?->label_cabang ?? $record->cabang_text ?? 'Bank Sulteng').')')
                                 ->searchable(['profil', 'nama_lokasi', 'luno', 'serial_number'])
                                 ->live()
@@ -211,13 +211,13 @@ class TiketForm
                                 ->required()
                                 ->default(now())
                                 ->seconds(false)
-                                ->live()
+                                ->live(onBlur: true)
                                 ->afterStateUpdated(fn ($state, callable $get, callable $set) => static::calculateDuration($get, $set)),
 
                             DateTimePicker::make('selesai')
                                 ->label('Closed Tiket (End)')
                                 ->seconds(false)
-                                ->live()
+                                ->live(onBlur: true)
                                 ->helperText('Kosongkan bila gangguan masih berlangsung (Open)')
                                 ->suffixAction(
                                     Action::make('setNow')

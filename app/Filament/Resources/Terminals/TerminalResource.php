@@ -37,7 +37,7 @@ class TerminalResource extends Resource
 
     public static function getNavigationBadge(): ?string
     {
-        return (string) static::getModel()::count();
+        return (string) Terminal::getCountsSummary()['total'];
     }
 
     public static function getWidgets(): array

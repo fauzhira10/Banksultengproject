@@ -93,7 +93,7 @@ class LaporanSlaBulanan extends Page
 
     public function getVendorsProperty()
     {
-        return Vendor::orderBy('nama_vendor')->get();
+        return Vendor::withCount('terminals')->orderBy('nama_vendor')->get();
     }
 
     public function getSelectedVendorNameProperty(): string
@@ -102,7 +102,7 @@ class LaporanSlaBulanan extends Page
             return 'SEMUA VENDOR';
         }
 
-        return Vendor::find($this->vendor_id)?->nama_vendor ?? 'SEMUA VENDOR';
+        return $this->vendors->firstWhere('id', (int) $this->vendor_id)?->nama_vendor ?? 'SEMUA VENDOR';
     }
 
     public function getMonthsProperty(): array
@@ -154,7 +154,8 @@ class LaporanSlaBulanan extends Page
 
     public function getReportDataProperty(): array
     {
-        $query = Terminal::with(['cabang', 'vendor']);
+        $query = Terminal::with(['cabang:id,nama_cabang,label_cabang', 'vendor:id,nama_vendor'])
+            ->select(['id', 'profil', 'cabang_id', 'cabang_text', 'urutan_cabang', 'nama_lokasi', 'luno', 'serial_number', 'tipe_mesin', 'vendor_id']);
 
         if (! empty($this->vendor_id)) {
             $query->where('vendor_id', $this->vendor_id);
@@ -184,9 +185,10 @@ class LaporanSlaBulanan extends Page
         $this->koefisien = $koefisien;
         $now = now();
 
-        // Ambil seluruh tiket yang relevan pada rentang bulan ini
+        // Ambil seluruh tiket yang relevan pada rentang bulan ini (hanya kolom waktu kalkulasi)
         $terminalIds = $terminals->pluck('id');
         $tikets = Tiket::whereIn('terminal_id', $terminalIds)
+            ->select(['id', 'terminal_id', 'mulai', 'selesai'])
             ->where(function ($q) use ($startOfMonth, $endOfMonth) {
                 $q->whereBetween('mulai', [$startOfMonth, $endOfMonth])
                     ->orWhere(function ($sub) use ($startOfMonth, $endOfMonth) {

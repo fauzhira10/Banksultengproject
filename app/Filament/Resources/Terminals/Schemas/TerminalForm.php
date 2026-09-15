@@ -45,11 +45,6 @@ class TerminalForm
                                 ->label('Nomor Urut Per Cabang')
                                 ->numeric()
                                 ->placeholder('1, 2, 3...'),
-
-                            TextInput::make('rek_ia')
-                                ->label('Nomor Rekening IA (Inter-Account)')
-                                ->placeholder('Contoh: 101.01.00192')
-                                ->columnSpan(2),
                         ]),
                     ]),
 
@@ -120,17 +115,6 @@ class TerminalForm
                                 ->relationship('vendor', 'nama_vendor')
                                 ->searchable()
                                 ->preload(),
-
-                            Select::make('status')
-                                ->label('Status Operasional')
-                                ->options([
-                                    'Aktif' => 'Operasional Aktif',
-                                    'Belum Digunakan' => 'Belum Digunakan / Siap Relokasi',
-                                    'Di Gudang' => 'Di Gudang Thamrin',
-                                    'Maintenance' => 'Dalam Perbaikan (Offline)',
-                                ])
-                                ->default('Aktif')
-                                ->required(),
 
                             Toggle::make('is_hibah')
                                 ->label('Status Mesin Hibah')

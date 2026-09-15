@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Terminals\Tables;
 
 use App\Models\Terminal;
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -10,20 +11,25 @@ use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ViewAction;
 use Filament\Support\Enums\Size;
-use Filament\Tables\Columns\SelectColumn;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\TextInputColumn;
+use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class TerminalsTable
 {
     public static function configure(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn (Builder $query) => $query->with(['cabang', 'vendor']))
+            ->recordUrl(null)
+            ->recordAction(null)
+            ->searchPlaceholder('Cari Profil ATM, Lokasi, Cabang, IP, LUNO, SN, Vendor, Tipe...')
+            ->searchDebounce('400ms')
             ->columns([
                 TextColumn::make('profil')
                     ->label('Profil ATM')
@@ -71,6 +77,7 @@ class TerminalsTable
 
                 TextColumn::make('tipe_mesin')
                     ->label('Tipe / Merek')
+                    ->searchable(query: fn ($query, string $search) => $query->where(fn ($q) => $q->where('tipe_mesin', 'like', "%{$search}%")->orWhere('serial_number', 'like', "%{$search}%")))
                     ->sortable()
                     ->description(fn (Terminal $record): string => $record->serial_number ? "SN: {$record->serial_number}" : ''),
 
@@ -92,6 +99,7 @@ class TerminalsTable
 
                 TextColumn::make('vendor.nama_vendor')
                     ->label('Vendor')
+                    ->searchable()
                     ->badge()
                     ->color(fn (?string $state): string => match ($state) {
                         'SRISHINDU' => 'purple',
@@ -99,22 +107,6 @@ class TerminalsTable
                         'HIBAH', 'HIBAH SRISHINDU' => 'warning',
                         default => 'gray',
                     }),
-
-                TextInputColumn::make('rek_ia')
-                    ->label('Rekening IA')
-                    ->placeholder('Klik untuk isi...')
-                    ->sortable()
-                    ->searchable(),
-
-                SelectColumn::make('status')
-                    ->label('Status')
-                    ->options([
-                        'Aktif' => 'Aktif',
-                        'Belum Digunakan' => 'Belum Digunakan',
-                        'Di Gudang' => 'Di Gudang',
-                        'Maintenance' => 'Perbaikan',
-                    ])
-                    ->selectablePlaceholder(false),
             ])
             ->defaultSort('id', 'asc')
             ->filters([
@@ -148,17 +140,16 @@ class TerminalsTable
                 TernaryFilter::make('is_hibah')
                     ->label('Mesin Hibah'),
 
-                SelectFilter::make('status')
-                    ->label('Status Operasional')
-                    ->options([
-                        'Aktif' => 'Operasional Aktif',
-                        'Belum Digunakan' => 'Belum Digunakan',
-                        'Di Gudang' => 'Di Gudang Thamrin',
-                        'Maintenance' => 'Dalam Perbaikan',
-                    ]),
-
                 TrashedFilter::make(),
-            ])
+            ], layout: FiltersLayout::Modal)
+            ->filtersFormColumns(2)
+            ->filtersTriggerAction(
+                fn (Action $action) => $action
+                    ->button()
+                    ->label('Filter Data')
+                    ->icon('heroicon-m-funnel')
+                    ->slideOver()
+            )
             ->groups([
                 Group::make('cabang.label_cabang')
                     ->label('Kantor Cabang')
@@ -174,7 +165,7 @@ class TerminalsTable
             ->recordActionsAlignment('center')
             ->recordActions([
                 ViewAction::make()
-                    ->label('Lihat')
+                    ->label('Detail')
                     ->icon('heroicon-m-eye')
                     ->color('info')
                     ->button()

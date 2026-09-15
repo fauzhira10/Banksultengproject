@@ -155,4 +155,36 @@ class Tiket extends Model
 
         return $candidate;
     }
+
+    /**
+     * Mengambil ringkasan jumlah data tiket dalam satu query agregat (memoized per-request).
+     *
+     * @return array{total: int, open: int, closed: int, mesin: int, jaringan_listrik: int}
+     */
+    public static function getCountsSummary(bool $fresh = false): array
+    {
+        static $cached = null;
+
+        if ($cached !== null && ! $fresh) {
+            return $cached;
+        }
+
+        $row = static::query()
+            ->selectRaw("
+                COUNT(*) as total,
+                SUM(CASE WHEN status = 'Open' THEN 1 ELSE 0 END) as open_count,
+                SUM(CASE WHEN status = 'Closed' THEN 1 ELSE 0 END) as closed_count,
+                SUM(CASE WHEN kategori_problem = 'Mesin ATM' THEN 1 ELSE 0 END) as mesin_count,
+                SUM(CASE WHEN kategori_problem IN ('Jaringan', 'Listrik', 'System') THEN 1 ELSE 0 END) as jaringan_listrik_count
+            ")
+            ->first();
+
+        return $cached = [
+            'total' => (int) ($row->total ?? 0),
+            'open' => (int) ($row->open_count ?? 0),
+            'closed' => (int) ($row->closed_count ?? 0),
+            'mesin' => (int) ($row->mesin_count ?? 0),
+            'jaringan_listrik' => (int) ($row->jaringan_listrik_count ?? 0),
+        ];
+    }
 }
