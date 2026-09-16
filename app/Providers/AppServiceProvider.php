@@ -2,11 +2,15 @@
 
 namespace App\Providers;
 
+use App\Http\Responses\LoginResponse;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Auth\Http\Responses\Contracts\LoginResponse as LoginResponseContract;
+use Illuminate\Auth\Events\Login;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -16,7 +20,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->singleton(
+            LoginResponseContract::class,
+            LoginResponse::class,
+        );
     }
 
     /**
@@ -25,6 +32,11 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->centerDeleteConfirmationModals();
+
+        Event::listen(
+            Login::class,
+            fn () => LoginResponse::resetSessionHistory()
+        );
     }
 
     /**

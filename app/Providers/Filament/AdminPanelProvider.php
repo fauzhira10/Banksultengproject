@@ -31,6 +31,7 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
+            ->homeUrl('/admin/tikets')
             ->login(Login::class)
             ->brandName('Monitoring SLA ATM - Bank Sulteng')
             ->sidebarCollapsibleOnDesktop()
