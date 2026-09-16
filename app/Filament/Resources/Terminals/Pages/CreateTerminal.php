@@ -8,4 +8,11 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateTerminal extends CreateRecord
 {
     protected static string $resource = TerminalResource::class;
+
+    protected static bool $canCreateAnother = false;
+
+    public function canCreateAnother(): bool
+    {
+        return false;
+    }
 }

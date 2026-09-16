@@ -195,51 +195,154 @@ html {
     -moz-osx-font-smoothing: grayscale;
 }
 
-/* 2. Form Labels & Inputs: Touch Target >= 44px, Font >= 14px */
+/* 2. Form Labels & Inputs: Touch Target >= 46px, Font >= 15px, Comfortable Spacing */
+.fi-fo-field-label,
+.fi-fo-field-label label,
+.fi-fo-field-label-content,
 .fi-fo-field-wrp-label,
 .fi-fo-field-wrp-label label {
     font-size: 0.9375rem !important; /* 15px */
     font-weight: 600 !important;
     letter-spacing: 0.01em !important;
-    margin-bottom: 0.375rem !important;
+    margin-bottom: 0.45rem !important;
 }
 
+html:not(.dark) .fi-fo-field-label,
+html:not(.dark) .fi-fo-field-label label,
+html:not(.dark) .fi-fo-field-label-content,
 html:not(.dark) .fi-fo-field-wrp-label,
 html:not(.dark) .fi-fo-field-wrp-label label {
-    color: #1e293b !important; /* Slate 800 - high contrast */
+    color: #0f172a !important; /* Slate 900 - high contrast readability */
 }
 
+html.dark .fi-fo-field-label,
+html.dark .fi-fo-field-label label,
+html.dark .fi-fo-field-label-content,
 html.dark .fi-fo-field-wrp-label,
 html.dark .fi-fo-field-wrp-label label {
     color: #f1f5f9 !important; /* Slate 100 */
 }
 
 /* Helper text legible, not washed out */
+.fi-fo-field-helper-text,
 .fi-fo-field-wrp-helper-text {
     font-size: 0.84rem !important; /* ~13.5px */
     line-height: 1.4 !important;
-    margin-top: 0.35rem !important;
+    margin-top: 0.4rem !important;
 }
 
+html:not(.dark) .fi-fo-field-helper-text,
 html:not(.dark) .fi-fo-field-wrp-helper-text {
     color: #475569 !important; /* Slate 600 */
 }
 
+html.dark .fi-fo-field-helper-text,
 html.dark .fi-fo-field-wrp-helper-text {
     color: #94a3b8 !important; /* Slate 400 */
 }
 
-/* Minimum 44px Touch Targets for form inputs and selects (Fitts's Law) */
+/* Jarak vertikal & horizontal antar kolom form agar tidak mepet */
+.fi-sc-grid {
+    gap: 1.25rem !important;
+}
+
+.fi-fo-field {
+    gap: 0.45rem !important;
+}
+
+/* Ergonomic 46px Touch Targets for form inputs, selects, and textareas */
 .fi-input-wrp {
-    min-height: 2.75rem !important; /* 44px target */
-    border-radius: 0.5rem !important;
+    min-height: 2.875rem !important; /* 46px target */
+    border-radius: 0.625rem !important;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out, background-color 0.15s ease-in-out !important;
+}
+
+/* 1. TEMA TERANG (LIGHT MODE): Border tegas, kontras tinggi & sangat jelas di mata */
+html:not(.dark) .fi-input-wrp {
+    background-color: #ffffff !important;
+    border: 1.5px solid #94a3b8 !important; /* Slate 400 - kontras tinggi, tegas terlihat di atas latar putih */
+    box-shadow: 0 1px 2px 0 rgba(15, 23, 42, 0.05) !important;
+}
+
+html:not(.dark) .fi-input-wrp:hover {
+    border-color: #64748b !important; /* Slate 500 saat hover */
+}
+
+html:not(.dark) .fi-input-wrp:focus-within {
+    border-color: #2563eb !important; /* Blue 600 */
+    box-shadow: 0 0 0 3.5px rgba(37, 99, 235, 0.15), 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+    background-color: #ffffff !important;
+}
+
+/* 2. TEMA GELAP (DARK MODE): Border slate pekat dan jelas */
+html.dark .fi-input-wrp {
+    background-color: #0f172a !important; /* Slate 900 */
+    border: 1.5px solid #334155 !important; /* Slate 700 */
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.25) !important;
+}
+
+html.dark .fi-input-wrp:hover {
+    border-color: #475569 !important;
+}
+
+html.dark .fi-input-wrp:focus-within {
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 3.5px rgba(59, 130, 246, 0.25) !important;
+}
+
+/* State disabled / read-only */
+html:not(.dark) .fi-input-wrp.fi-disabled {
+    background-color: #f1f5f9 !important;
+    border-color: #cbd5e1 !important;
+    opacity: 0.8 !important;
+}
+
+html.dark .fi-input-wrp.fi-disabled {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+    opacity: 0.8 !important;
 }
 
 .fi-input-wrp .fi-input,
+.fi-input-wrp input,
 .fi-input-wrp select,
 .fi-input-wrp textarea {
     font-size: 0.9375rem !important; /* 15px */
     line-height: 1.5 !important;
+    padding-top: 0.625rem !important;
+    padding-bottom: 0.625rem !important;
+    padding-left: 0.875rem !important;
+    padding-right: 0.875rem !important;
+}
+
+html:not(.dark) .fi-input-wrp-prefix .fi-icon,
+html:not(.dark) .fi-input-wrp-suffix .fi-icon {
+    color: #64748b !important;
+}
+
+html.dark .fi-input-wrp-prefix .fi-icon,
+html.dark .fi-input-wrp-suffix .fi-icon {
+    color: #94a3b8 !important;
+}
+
+/* Section styling: tampilan kartu lapang dan bersih */
+.fi-sc-section {
+    border-radius: 1rem !important;
+    border: 1px solid rgba(226, 232, 240, 0.9) !important;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.03), 0 1px 2px -1px rgba(0, 0, 0, 0.02) !important;
+}
+
+html.dark .fi-sc-section {
+    border: 1px solid rgba(51, 65, 85, 0.8) !important;
+}
+
+.fi-sc-section-header {
+    padding-bottom: 0.75rem !important;
+    border-bottom: 1px solid rgba(226, 232, 240, 0.7) !important;
+}
+
+html.dark .fi-sc-section-header {
+    border-bottom: 1px solid rgba(51, 65, 85, 0.7) !important;
 }
 
 /* 3. High-Legibility Tables for Elderly & All Ages */
@@ -440,7 +543,7 @@ body:has(.fi-simple-layout),
 
 .fi-simple-main {
     width: 100% !important;
-    max-width: 26.5rem !important;
+    max-width: 28rem !important;
     margin: 0 auto !important;
     padding: 2.25rem 1.5rem 2rem !important;
     border-radius: 1.25rem !important;
@@ -494,11 +597,17 @@ html.dark .fi-simple-main {
 }
 
 .fi-simple-header-heading {
-    font-size: 1.5rem !important;
+    font-size: 1.375rem !important;
     font-weight: 800 !important;
     letter-spacing: -0.025em !important;
     line-height: 1.25 !important;
     margin: 0 !important;
+}
+
+@media (min-width: 640px) {
+    .fi-simple-header-heading {
+        font-size: 1.5rem !important;
+    }
 }
 
 html:not(.dark) .fi-simple-header-heading {

@@ -19,6 +19,10 @@ class LoginTest extends TestCase
 
         $response->assertSuccessful();
         $response->assertSee('Username');
+        $response->assertSee('Sistem Monitoring SLA ATM');
+        $response->assertSee('PT Bank Pembangunan Daerah Sulawesi Tengah');
+        $response->assertDontSee('Akses Terbatas');
+        $response->assertDontSee('remember');
         $response->assertDontSee('data.email');
     }
 

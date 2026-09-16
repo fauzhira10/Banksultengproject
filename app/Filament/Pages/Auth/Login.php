@@ -7,6 +7,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Component;
 use Filament\Schemas\Schema;
 use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Support\HtmlString;
 use Illuminate\Validation\ValidationException;
 use SensitiveParameter;
 
@@ -14,12 +15,15 @@ class Login extends BaseLogin
 {
     public function getHeading(): string|Htmlable|null
     {
-        return 'Masuk ke Sistem';
+        return 'Sistem Monitoring SLA ATM';
     }
 
     public function getSubheading(): string|Htmlable|null
     {
-        return 'Silakan masukkan username dan password Anda.';
+        return new HtmlString(
+            '<span class="block font-semibold text-slate-800 dark:text-slate-200">PT Bank Pembangunan Daerah Sulawesi Tengah</span>'.
+            '<span class="mt-1 block text-xs text-slate-500 dark:text-slate-400">Portal Pemantauan Ketersediaan & Resolusi Kendala Jaringan ATM/CRM</span>'
+        );
     }
 
     /**
@@ -37,7 +41,6 @@ class Login extends BaseLogin
             ->components([
                 $this->getUsernameFormComponent(),
                 $this->getPasswordFormComponent(),
-                $this->getRememberFormComponent(),
             ]);
     }
 
