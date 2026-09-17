@@ -155,7 +155,7 @@ class TerminalTemplateService
                     'ip' => '172.16.27.2',
                     'luno' => '0018',
                     'port' => '8018',
-                    'vendor' => 'ASSINDO',
+                    'vendor' => 'KOPERASI BANK SULTENG',
                     'sn' => '1522FDC20645',
                     'tipe' => 'ATM Diebold OPTEVA 522',
                     'kategori' => 'ATM',

@@ -143,4 +143,70 @@ class TerminalFormTest extends TestCase
         $response->assertSee('WCR.KCU1');
         $response->assertSee('RS Undata Palu');
     }
+
+    public function test_hibah_terminal_automatically_assigns_vendor_koperasi_bank_sulteng(): void
+    {
+        $user = User::factory()->create();
+        $cabang = Cabang::create([
+            'kode_cabang' => '001',
+            'nama_cabang' => 'Utama Palu',
+            'label_cabang' => '001-Utama Palu',
+        ]);
+        $otherVendor = Vendor::create(['nama_vendor' => 'SRISHINDU INFORMATIKA']);
+
+        // 1. Eloquent saving hook test
+        $terminal = Terminal::create([
+            'profil' => 'DBL.TEST_HIBAH',
+            'nama_lokasi' => 'Lokasi Hibah Test',
+            'cabang_id' => $cabang->id,
+            'vendor_id' => $otherVendor->id,
+            'kategori' => 'ATM',
+            'tipe_mesin' => 'Diebold 522',
+            'denom' => '100',
+            'is_hibah' => true,
+        ]);
+
+        $this->assertSame('KOPERASI BANK SULTENG', $terminal->fresh()->vendor_text);
+        $koperasi = Vendor::where('nama_vendor', 'KOPERASI BANK SULTENG')->first();
+        $this->assertNotNull($koperasi);
+        $this->assertSame($koperasi->id, $terminal->fresh()->vendor_id);
+
+        // 2. Filament Form create test
+        $this->actingAs($user);
+
+        Livewire::test(CreateTerminal::class)
+            ->assertSuccessful()
+            ->fillForm([
+                'profil' => 'DBL.FORM_HIBAH',
+                'kategori' => 'ATM',
+                'nama_lokasi' => 'Kantor Samsat 2',
+                'cabang_id' => $cabang->id,
+                'urutan_cabang' => 5,
+                'tipe_mesin' => 'Diebold 522',
+                'denom' => '100',
+                'is_hibah' => true,
+            ])
+            ->call('create')
+            ->assertHasNoFormErrors();
+
+        $savedFormTerminal = Terminal::where('profil', 'DBL.FORM_HIBAH')->first();
+        $this->assertNotNull($savedFormTerminal);
+        $this->assertTrue($savedFormTerminal->is_hibah);
+        $this->assertSame($koperasi->id, $savedFormTerminal->vendor_id);
+        $this->assertSame('KOPERASI BANK SULTENG', $savedFormTerminal->vendor_text);
+
+        // 3. Saving with raw vendor 'HIBAH' converts to KOPERASI BANK SULTENG
+        $rawHibahTerminal = Terminal::create([
+            'profil' => 'DBL.RAW_HIBAH',
+            'nama_lokasi' => 'Lokasi Hibah Raw',
+            'cabang_id' => $cabang->id,
+            'vendor_text' => 'HIBAH',
+            'kategori' => 'ATM',
+            'denom' => '100',
+        ]);
+
+        $this->assertTrue($rawHibahTerminal->fresh()->is_hibah);
+        $this->assertSame('KOPERASI BANK SULTENG', $rawHibahTerminal->fresh()->vendor_text);
+        $this->assertSame($koperasi->id, $rawHibahTerminal->fresh()->vendor_id);
+    }
 }

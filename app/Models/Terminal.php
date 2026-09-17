@@ -36,6 +36,29 @@ class Terminal extends Model
         'urutan_cabang' => 'integer',
     ];
 
+    protected static function booted(): void
+    {
+        static::saving(function (Terminal $terminal): void {
+            $rawVendor = strtoupper(trim((string) ($terminal->vendor_text ?? '')));
+            $isHibahVendor = str_contains($rawVendor, 'HIBAH');
+
+            if (! $isHibahVendor && $terminal->vendor_id) {
+                $vendorObj = Vendor::find($terminal->vendor_id);
+                if ($vendorObj && str_contains(strtoupper($vendorObj->nama_vendor), 'HIBAH')) {
+                    $isHibahVendor = true;
+                }
+            }
+
+            if ($terminal->is_hibah || $isHibahVendor) {
+                $terminal->is_hibah = true;
+                $terminal->vendor_text = 'KOPERASI BANK SULTENG';
+
+                $koperasi = Vendor::firstOrCreate(['nama_vendor' => 'KOPERASI BANK SULTENG']);
+                $terminal->vendor_id = $koperasi->id;
+            }
+        });
+    }
+
     public function cabang(): BelongsTo
     {
         return $this->belongsTo(Cabang::class);

@@ -26,15 +26,16 @@ class CreateTiket extends CreateRecord
 
     protected function beforeValidate(): void
     {
-        $currentNo = $this->data['nomor_tiket'] ?? null;
-        if (! $currentNo || Tiket::withTrashed()->where('nomor_tiket', $currentNo)->exists()) {
+        $currentNo = trim((string) ($this->data['nomor_tiket'] ?? ''));
+        if ($currentNo === '') {
             $this->data['nomor_tiket'] = Tiket::generateNomorTiket();
         }
     }
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {
-        if (empty($data['nomor_tiket']) || Tiket::withTrashed()->where('nomor_tiket', $data['nomor_tiket'])->exists()) {
+        $currentNo = trim((string) ($data['nomor_tiket'] ?? ''));
+        if ($currentNo === '') {
             $data['nomor_tiket'] = Tiket::generateNomorTiket();
         }
 

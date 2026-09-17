@@ -254,4 +254,44 @@ class TerminalImportTest extends TestCase
             ->assertActionExists('importExcel')
             ->assertActionExists('downloadTemplate');
     }
+
+    public function test_terminal_import_service_assigns_koperasi_vendor_for_hibah_terminals(): void
+    {
+        Cabang::create([
+            'kode_cabang' => '001',
+            'nama_cabang' => 'Utama Palu',
+            'label_cabang' => '001-Utama Palu',
+        ]);
+
+        $csvContent = implode("\n", [
+            'Profil,Cabang,Lokasi,Tipe Mesin,Vendor,Status',
+            'DBL.HIBAH1,001-Utama Palu,Kantor Samsat Baru,Diebold 522,SRISHINDU,Aktif',
+            'DBL.HIBAH2,001-Utama Palu,Kantor Samsat Lama,Diebold 529,HIBAH,Aktif',
+        ]);
+
+        $tempCsv = tempnam(sys_get_temp_dir(), 'test_hibah_').'.csv';
+        file_put_contents($tempCsv, $csvContent);
+
+        $service = new TerminalImportService;
+        $stats = $service->import($tempCsv, updateExisting: true, autoCreateRelations: true);
+
+        @unlink($tempCsv);
+
+        $this->assertSame(2, $stats['total']);
+        $this->assertSame(2, $stats['created']);
+
+        $t1 = Terminal::where('profil', 'DBL.HIBAH1')->first();
+        $this->assertNotNull($t1);
+        $this->assertTrue($t1->is_hibah);
+        $this->assertSame('KOPERASI BANK SULTENG', $t1->vendor_text);
+        $this->assertDatabaseHas('vendors', ['nama_vendor' => 'KOPERASI BANK SULTENG']);
+        $koperasi = Vendor::where('nama_vendor', 'KOPERASI BANK SULTENG')->first();
+        $this->assertSame($koperasi->id, $t1->vendor_id);
+
+        $t2 = Terminal::where('profil', 'DBL.HIBAH2')->first();
+        $this->assertNotNull($t2);
+        $this->assertTrue($t2->is_hibah);
+        $this->assertSame('KOPERASI BANK SULTENG', $t2->vendor_text);
+        $this->assertSame($koperasi->id, $t2->vendor_id);
+    }
 }

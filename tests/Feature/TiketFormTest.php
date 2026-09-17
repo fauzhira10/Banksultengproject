@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Filament\Resources\Tikets\Pages\CreateTiket;
+use App\Filament\Resources\Tikets\Pages\EditTiket;
 use App\Filament\Resources\Tikets\Pages\ListTikets;
 use App\Filament\Resources\Tikets\TiketResource;
 use App\Models\Cabang;
@@ -341,6 +342,66 @@ class TiketFormTest extends TestCase
             'nomor_tiket' => $prefix.'0002',
             'permasalahan' => 'SOFTWARE CORRUPT',
             'deleted_at' => null,
+        ]);
+    }
+
+    public function test_user_can_manually_type_and_edit_nomor_tiket_on_create_and_edit(): void
+    {
+        $user = User::factory()->create();
+        $cabang = Cabang::create([
+            'kode_cabang' => '001',
+            'nama_cabang' => 'KCU Palu',
+            'label_cabang' => '001-KCU Palu',
+        ]);
+        $vendor = Vendor::create(['nama_vendor' => 'SRISHINDU']);
+        $terminal = Terminal::create([
+            'profil' => 'WCR.KCU1',
+            'nama_lokasi' => 'Galeri ATM Kantor Pusat',
+            'cabang_id' => $cabang->id,
+            'vendor_id' => $vendor->id,
+            'kategori' => 'ATM',
+            'tipe_mesin' => 'Wincor 280',
+            'denom' => '100',
+        ]);
+
+        $this->actingAs($user);
+
+        // 1. Manual typing when creating new ticket
+        Livewire::test(CreateTiket::class)
+            ->assertSuccessful()
+            ->fillForm([
+                'nomor_tiket' => 'VENDOR-TKT-12345',
+                'terminal_id' => $terminal->id,
+                'kategori_problem' => 'Mesin ATM',
+                'permasalahan' => 'DISPENSER ERROR',
+                'deskripsi' => 'Kendala tiket manual',
+                'status' => 'Open',
+                'mulai' => now()->format('Y-m-d H:i:s'),
+            ])
+            ->call('create')
+            ->assertHasNoFormErrors();
+
+        $this->assertDatabaseHas('tikets', [
+            'nomor_tiket' => 'VENDOR-TKT-12345',
+            'permasalahan' => 'DISPENSER ERROR',
+        ]);
+
+        $createdTiket = Tiket::where('nomor_tiket', 'VENDOR-TKT-12345')->first();
+        $this->assertNotNull($createdTiket);
+
+        // 2. Manual editing of existing ticket number
+        Livewire::test(EditTiket::class, ['record' => $createdTiket->getRouteKey()])
+            ->assertSuccessful()
+            ->assertFormSet(['nomor_tiket' => 'VENDOR-TKT-12345'])
+            ->fillForm([
+                'nomor_tiket' => 'VENDOR-TKT-EDITED-99',
+            ])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $this->assertDatabaseHas('tikets', [
+            'id' => $createdTiket->id,
+            'nomor_tiket' => 'VENDOR-TKT-EDITED-99',
         ]);
     }
 }

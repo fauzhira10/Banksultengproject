@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Terminals\Schemas;
 
+use App\Models\Vendor;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -124,11 +125,22 @@ class TerminalForm
                                     ->searchable()
                                     ->preload()
                                     ->prefixIcon('heroicon-m-wrench-screwdriver')
-                                    ->helperText('Mitra vendor penanggung jawab pemeliharaan SLA'),
+                                    ->helperText(fn (callable $get): string => $get('is_hibah')
+                                        ? 'Mesin hibah otomatis dialokasikan ke vendor KOPERASI BANK SULTENG.'
+                                        : 'Mitra vendor penanggung jawab pemeliharaan SLA')
+                                    ->disabled(fn (callable $get): bool => (bool) $get('is_hibah'))
+                                    ->dehydrated(),
 
                                 Toggle::make('is_hibah')
                                     ->label('Status Mesin Hibah')
-                                    ->helperText('Aktifkan jika unit mesin merupakan barang hibah (misal: Diebold 522)')
+                                    ->helperText('Aktifkan jika unit mesin merupakan hibah (vendor otomatis KOPERASI BANK SULTENG)')
+                                    ->live()
+                                    ->afterStateUpdated(function (bool $state, callable $set): void {
+                                        if ($state) {
+                                            $koperasi = Vendor::firstOrCreate(['nama_vendor' => 'KOPERASI BANK SULTENG']);
+                                            $set('vendor_id', $koperasi->id);
+                                        }
+                                    })
                                     ->columnSpanFull(),
 
                                 Textarea::make('keterangan')

@@ -18,8 +18,6 @@ class TerminalSeeder extends Seeder
         $vendorsJson = <<<'JSON'
 [
     "ASSINDO",
-    "HIBAH",
-    "HIBAH SRISHINDU",
     "SRISHINDU",
     "SRISHINDU INFORMATIKA",
     "PT KIS",
@@ -32,6 +30,9 @@ JSON;
             $v = Vendor::firstOrCreate(['nama_vendor' => $vName]);
             $vendorMap[$vName] = $v->id;
         }
+        // Pastikan alias vendor Hibah otomatis merujuk ke KOPERASI BANK SULTENG
+        $vendorMap['HIBAH'] = $vendorMap['KOPERASI BANK SULTENG'] ?? null;
+        $vendorMap['HIBAH SRISHINDU'] = $vendorMap['KOPERASI BANK SULTENG'] ?? null;
 
         // 2. Seed Cabang
         $cabangsJson = <<<'JSON'
@@ -361,12 +362,12 @@ JSON;
             "ip_address": "172.16.27.2",
             "luno": "0018",
             "port": "8018",
-            "vendor_name": "SRISHINDU INFORMATIKA",
+            "vendor_name": "KOPERASI BANK SULTENG",
             "serial_number": "1522FDC20645",
             "denom": "100",
             "tipe_mesin": "ATM Diebold OPTEVA 522",
             "kategori": "ATM",
-            "is_hibah": false,
+            "is_hibah": true,
             "rek_ia": null,
             "status": "Aktif"
         },

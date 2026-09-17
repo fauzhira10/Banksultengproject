@@ -102,9 +102,11 @@ class TerminalsTable
                     ->searchable()
                     ->badge()
                     ->color(fn (?string $state): string => match ($state) {
-                        'SRISHINDU' => 'purple',
+                        'SRISHINDU', 'SRISHINDU INFORMATIKA' => 'purple',
                         'ASSINDO' => 'info',
-                        'HIBAH', 'HIBAH SRISHINDU' => 'warning',
+                        'KOPERASI BANK SULTENG' => 'success',
+                        'COLLEGA INTI PRATAMA' => 'warning',
+                        'PT KIS' => 'primary',
                         default => 'gray',
                     }),
             ])

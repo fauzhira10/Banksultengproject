@@ -38,10 +38,11 @@ class TiketForm
                                     ->label('No Tiket')
                                     ->required()
                                     ->unique(ignoreRecord: true)
-                                    ->default(fn () => Tiket::generateNomorTiket())
-                                    ->readOnly()
-                                    ->extraInputAttributes(['class' => 'font-mono font-bold tracking-wider'])
-                                    ->helperText('Dibuat otomatis oleh sistem'),
+                                    ->default(fn (): string => Tiket::generateNomorTiket())
+                                    ->placeholder('Contoh: BST2501100001 atau nomor tiket vendor')
+                                    ->extraInputAttributes(['class' => 'font-mono font-bold tracking-wider uppercase'])
+                                    ->helperText('Nomor tiket dibuat otomatis oleh sistem, atau dapat diketik / diedit manual.')
+                                    ->maxLength(50),
 
                                 Select::make('permasalahan')
                                     ->label('Permasalahan')

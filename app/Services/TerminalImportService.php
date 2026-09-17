@@ -300,7 +300,9 @@ class TerminalImportService
 
         // 4. Resolve Cabang & Vendor
         [$cabangId, $cabangText] = $this->resolveCabang($rawCabang, $autoCreateRelations);
-        [$vendorId, $vendorText] = $this->resolveVendor($rawVendor, $autoCreateRelations);
+        [$vendorId, $vendorText] = $isHibah
+            ? $this->resolveVendor('KOPERASI BANK SULTENG', $autoCreateRelations)
+            : $this->resolveVendor($rawVendor, $autoCreateRelations);
 
         // 6. Urutan Cabang
         $urutanCabang = null;
@@ -439,6 +441,10 @@ class TerminalImportService
         }
 
         $clean = trim($rawVendor);
+
+        if (str_contains(strtoupper($clean), 'HIBAH')) {
+            $clean = 'KOPERASI BANK SULTENG';
+        }
 
         $vendor = $this->vendors->first(function (Vendor $v) use ($clean) {
             return strcasecmp($v->nama_vendor, $clean) === 0;
