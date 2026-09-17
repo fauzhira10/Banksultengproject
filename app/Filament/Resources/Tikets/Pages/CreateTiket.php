@@ -10,7 +10,14 @@ class CreateTiket extends CreateRecord
 {
     protected static string $resource = TiketResource::class;
 
+    protected static bool $canCreateAnother = false;
+
     protected static ?string $title = 'Input Tiket Masalah ATM Baru';
+
+    public function canCreateAnother(): bool
+    {
+        return false;
+    }
 
     public function getSubheading(): ?string
     {

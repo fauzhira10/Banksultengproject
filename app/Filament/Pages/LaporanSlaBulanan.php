@@ -9,6 +9,8 @@ use BackedEnum;
 use Carbon\Carbon;
 use Filament\Pages\Page;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Livewire\WithPagination;
 use OpenSpout\Common\Entity\Cell;
 use OpenSpout\Common\Entity\Row;
 use OpenSpout\Common\Entity\Style\Border;
@@ -23,6 +25,8 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class LaporanSlaBulanan extends Page
 {
+    use WithPagination;
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentChartBar;
 
     protected static ?string $navigationLabel = 'Laporan SLA Bulanan';
@@ -42,6 +46,8 @@ class LaporanSlaBulanan extends Page
     public int $koefisien = 44640;
 
     public string $search = '';
+
+    public int $perPage = 100;
 
     public function mount(): void
     {
@@ -70,6 +76,7 @@ class LaporanSlaBulanan extends Page
     {
         $this->vendor_id = $id;
         session(['sla_selected_vendor_id' => $id]);
+        $this->resetPage();
     }
 
     public function updatedVendorId($value): void
@@ -77,21 +84,30 @@ class LaporanSlaBulanan extends Page
         if (! empty($value)) {
             session(['sla_selected_vendor_id' => (string) $value]);
         }
+        $this->resetPage();
     }
 
     public function updatedBulan(): void
     {
         $this->koefisien = $this->daysInMonth * 24 * 60;
+        $this->resetPage();
     }
 
     public function updatedTahun(): void
     {
         $this->koefisien = $this->daysInMonth * 24 * 60;
+        $this->resetPage();
+    }
+
+    public function updatedSearch(): void
+    {
+        $this->resetPage();
     }
 
     public function resetFilters(): void
     {
         $this->search = '';
+        $this->resetPage();
         $firstVendor = Vendor::whereHas('terminals')->orderBy('nama_vendor')->first() ?? Vendor::first();
         $this->vendor_id = (string) ($firstVendor?->id ?? '');
 
@@ -109,6 +125,26 @@ class LaporanSlaBulanan extends Page
     public function clearSearch(): void
     {
         $this->search = '';
+        $this->resetPage();
+    }
+
+    public function getPaginatedRowsProperty(): LengthAwarePaginator
+    {
+        $allRows = $this->reportData['rows'];
+        $total = count($allRows);
+        $page = max(1, (int) $this->getPage());
+        $items = array_slice($allRows, ($page - 1) * $this->perPage, $this->perPage);
+
+        return new LengthAwarePaginator(
+            items: $items,
+            total: $total,
+            perPage: $this->perPage,
+            currentPage: $page,
+            options: [
+                'path' => request()->url(),
+                'pageName' => 'page',
+            ]
+        );
     }
 
     public function getVendorsProperty()

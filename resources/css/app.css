@@ -188,11 +188,47 @@ html.theme-transitioning *::after {
    Designed for all ages with high legibility, comfortable targets, & high contrast
    ========================================================================== */
 
-/* 1. Base Typography & Antialiasing */
+/* 1. Base Typography & Antialiasing with Multi-Monitor Responsive Scaling */
 html {
-    font-size: 16px;
+    font-size: 15.5px;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+/* 13" - 14" Laptops (1280px - 1439px): standar tajam & lega */
+@media (min-width: 1280px) {
+    html {
+        font-size: 16px;
+    }
+}
+
+/* 14" - 15" Laptops / Monitors (1440px - 1599px): diperbesar proporsional */
+@media (min-width: 1440px) {
+    html {
+        font-size: 16.5px;
+    }
+}
+
+/* 15.6" Full HD Laptops & Desktop Monitors (1600px - 1919px) */
+@media (min-width: 1600px) {
+    html {
+        font-size: 17px;
+    }
+}
+
+/* Large Desktop Monitors (>= 1920px: 21", 24", 27"+) */
+@media (min-width: 1920px) {
+    html {
+        font-size: 17.5px;
+    }
+}
+
+/* Ultra-wide / 2K Monitors (>= 2200px) */
+@media (min-width: 2200px) {
+    html {
+        font-size: 18px;
+    }
 }
 
 /* 2. Form Labels & Inputs: Touch Target >= 46px, Font >= 15px, Comfortable Spacing */
@@ -345,35 +381,72 @@ html.dark .fi-sc-section-header {
     border-bottom: 1px solid rgba(51, 65, 85, 0.7) !important;
 }
 
-/* 3. High-Legibility Tables for Elderly & All Ages */
+/* 3. High-Legibility Tables for 13", 14", 15"+ Monitors & Multi-Generational Staff */
+.fi-ta {
+    width: 100% !important;
+}
+
+.fi-ta-content {
+    border-radius: 0.75rem !important;
+    overflow: hidden !important;
+}
+
 .fi-ta-header-cell {
-    padding-top: 0.875rem !important;
-    padding-bottom: 0.875rem !important;
-    font-size: 0.875rem !important; /* 14px */
-    font-weight: 700 !important;
+    padding-top: 1rem !important;
+    padding-bottom: 1rem !important;
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+    font-size: 0.9375rem !important; /* ~15px */
+    font-weight: 800 !important;
     letter-spacing: 0.025em !important;
 }
 
 html:not(.dark) .fi-ta-header-cell {
     background-color: #f1f5f9 !important;
     color: #0f172a !important;
-    border-bottom: 2px solid #cbd5e1 !important;
+    border-bottom: 2.5px solid #cbd5e1 !important;
 }
 
 html.dark .fi-ta-header-cell {
     background-color: #0f172a !important;
     color: #f8fafc !important;
-    border-bottom: 2px solid #334155 !important;
+    border-bottom: 2.5px solid #334155 !important;
 }
 
 .fi-ta-row {
     transition: background-color 0.12s ease-in-out !important;
+    border-bottom: 1.5px solid #e2e8f0 !important;
+}
+
+html.dark .fi-ta-row {
+    border-bottom: 1.5px solid #1e293b !important;
 }
 
 .fi-ta-cell {
-    padding-top: 0.875rem !important;
-    padding-bottom: 0.875rem !important;
-    font-size: 0.9125rem !important; /* ~14.6px */
+    padding-top: 0.95rem !important;
+    padding-bottom: 0.95rem !important;
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+    font-size: 0.95rem !important; /* ~15.2px */
+    vertical-align: middle !important;
+}
+
+@media (min-width: 1600px) {
+    .fi-ta-header-cell {
+        padding-top: 1.125rem !important;
+        padding-bottom: 1.125rem !important;
+        padding-left: 1.25rem !important;
+        padding-right: 1.25rem !important;
+        font-size: 1rem !important;
+    }
+
+    .fi-ta-cell {
+        padding-top: 1.05rem !important;
+        padding-bottom: 1.05rem !important;
+        padding-left: 1.25rem !important;
+        padding-right: 1.25rem !important;
+        font-size: 1rem !important;
+    }
 }
 
 html:not(.dark) .fi-ta-row:hover {
@@ -446,32 +519,110 @@ html.dark .fi-ta-row.bs-tiket-row-open > .fi-ta-cell:first-child {
 /* Table Text Legibility */
 .fi-ta-text-item,
 .fi-ta-text-item-label {
-    font-size: 0.9125rem !important;
+    font-size: 0.95rem !important;
     line-height: 1.45 !important;
 }
 
-html:not(.dark) .fi-ta-text-item {
-    color: #1e293b !important;
+html:not(.dark) .fi-ta-text-item,
+html:not(.dark) .fi-ta-text-item-label {
+    color: #0f172a !important; /* Slate 900 - kontras tinggi tajam */
 }
 
 html.dark .fi-ta-text-item {
     color: #f1f5f9 !important;
 }
 
-/* 4. Action Buttons: Minimum 42-44px click height, clear tactile feel */
+/* 4. Action Buttons: Minimum 44px click height, clear tactile feel */
 .fi-btn {
-    min-height: 2.625rem !important; /* 42px */
-    font-size: 0.9125rem !important;
+    min-height: 2.75rem !important; /* 44px */
+    font-size: 0.9375rem !important;
     font-weight: 600 !important;
     border-radius: 0.5rem !important;
-    padding-left: 1rem !important;
-    padding-right: 1rem !important;
+    padding-left: 1.125rem !important;
+    padding-right: 1.125rem !important;
     gap: 0.5rem !important;
 }
 
 .fi-btn:focus-visible {
     outline: 2px solid #2563eb !important;
     outline-offset: 2px !important;
+}
+
+/* Form Action Buttons ("Buat", "Simpan", "Batal") - Dibuat Lebih Besar, Mantap & Nyaman */
+.fi-ac {
+    gap: 1rem !important;
+    margin-top: 1.5rem !important;
+    padding-top: 0.5rem !important;
+}
+
+.fi-ac .fi-btn,
+.fi-form-actions .fi-btn,
+.fi-page-actions .fi-btn,
+.fi-modal-window .fi-ac .fi-btn {
+    min-height: 3.125rem !important; /* 50px - touch target nyaman & lega */
+    min-width: 8rem !important; /* Lebar tombol mantap, tidak sempit */
+    font-size: 1.025rem !important; /* ~16.5px teks jelas & tegas */
+    font-weight: 700 !important;
+    letter-spacing: 0.015em !important;
+    padding-left: 1.75rem !important;
+    padding-right: 1.75rem !important;
+    border-radius: 0.75rem !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    cursor: pointer !important;
+}
+
+/* Tombol Aksi Utama ("Buat" / "Simpan") */
+.fi-ac .fi-btn.fi-color-primary,
+.fi-ac .fi-btn[type="submit"],
+.fi-form-actions .fi-btn.fi-color-primary,
+.fi-page-actions .fi-btn.fi-color-primary,
+.fi-modal-window .fi-ac .fi-btn.fi-color-primary {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
+    color: #ffffff !important;
+    border: 1.5px solid transparent !important;
+    box-shadow: 0 4px 14px 0 rgba(37, 99, 235, 0.35) !important;
+}
+
+.fi-ac .fi-btn.fi-color-primary:hover,
+.fi-ac .fi-btn[type="submit"]:hover,
+.fi-form-actions .fi-btn.fi-color-primary:hover,
+.fi-page-actions .fi-btn.fi-color-primary:hover,
+.fi-modal-window .fi-ac .fi-btn.fi-color-primary:hover {
+    background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%) !important;
+    box-shadow: 0 6px 20px 0 rgba(37, 99, 235, 0.5) !important;
+    transform: translateY(-1.5px) !important;
+}
+
+.fi-ac .fi-btn.fi-color-primary:active,
+.fi-ac .fi-btn[type="submit"]:active {
+    transform: translateY(0) !important;
+    box-shadow: 0 2px 8px 0 rgba(37, 99, 235, 0.35) !important;
+}
+
+/* Tombol Aksi Sekunder ("Batal") */
+.fi-ac .fi-btn.fi-color-gray,
+.fi-form-actions .fi-btn.fi-color-gray,
+.fi-page-actions .fi-btn.fi-color-gray,
+.fi-modal-window .fi-ac .fi-btn.fi-color-gray {
+    background-color: #f1f5f9 !important;
+    border: 1.5px solid #cbd5e1 !important;
+    color: #334155 !important;
+    box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.05) !important;
+}
+
+.fi-ac .fi-btn.fi-color-gray:hover,
+.fi-form-actions .fi-btn.fi-color-gray:hover,
+.fi-page-actions .fi-btn.fi-color-gray:hover,
+.fi-modal-window .fi-ac .fi-btn.fi-color-gray:hover {
+    background-color: #e2e8f0 !important;
+    border-color: #94a3b8 !important;
+    color: #0f172a !important;
+    box-shadow: 0 2px 6px 0 rgba(15, 23, 42, 0.08) !important;
+    transform: translateY(-1.5px) !important;
+}
+
+.fi-ac .fi-btn.fi-color-gray:active {
+    transform: translateY(0) !important;
 }
 
 /* 5. Accessible Badges (No tiny unreadable 10px text) */
@@ -747,4 +898,252 @@ html.dark .fi-ta-filter-indicators {
     background-color: #0f172a !important;
     border: 1px solid #1e293b !important;
 }
+
+/* ==========================================================================
+   Smooth Sidebar Transitions & Interactive 3-Line (Garis 3) Toggle Button
+   ========================================================================== */
+
+/* 1. Smooth Desktop Sidebar Opening & Closing Animations */
+@media (min-width: 1024px) {
+    #fi-main-sidebar,
+    .fi-sidebar {
+        transition: width 320ms cubic-bezier(0.4, 0, 0.2, 1),
+                    transform 320ms cubic-bezier(0.4, 0, 0.2, 1),
+                    box-shadow 320ms cubic-bezier(0.4, 0, 0.2, 1),
+                    border-color 320ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+        will-change: width, transform;
+    }
+
+    .fi-main-ctn {
+        transition: margin 320ms cubic-bezier(0.4, 0, 0.2, 1),
+                    padding 320ms cubic-bezier(0.4, 0, 0.2, 1),
+                    width 320ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+    }
+
+    /* Hindari teks terpotong kasar saat transisi lebar sidebar */
+    .fi-sidebar-header,
+    .fi-sidebar-nav,
+    .fi-sidebar-footer,
+    .fi-sidebar-item-btn,
+    .fi-user-menu-trigger {
+        overflow-x: hidden !important;
+        white-space: nowrap !important;
+    }
+
+    .fi-sidebar-item-label,
+    .fi-sidebar-group-label,
+    .fi-user-menu-trigger-text {
+        transition: opacity 250ms ease-in-out !important;
+    }
+}
+
+/* 2. Interactive 3-Line (Garis 3) Sidebar Toggle Button */
+/* PENTING: Jangan gunakan display: inline-flex !important agar Alpine x-show dan Tailwind lg:hidden tidak tertimpa */
+.fi-topbar-open-collapse-sidebar-btn,
+.fi-topbar-close-collapse-sidebar-btn,
+.fi-topbar-open-sidebar-btn,
+.fi-topbar-close-sidebar-btn {
+    border-radius: 0.5rem !important;
+    cursor: pointer !important;
+    transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* Pastikan elemen yang disembunyikan oleh Alpine x-show tetap mutlak tersembunyi */
+.fi-topbar-open-collapse-sidebar-btn[style*="display: none"],
+.fi-topbar-close-collapse-sidebar-btn[style*="display: none"],
+.fi-topbar-open-sidebar-btn[style*="display: none"],
+.fi-topbar-close-sidebar-btn[style*="display: none"] {
+    display: none !important;
+}
+
+/* Sembunyikan tombol toggle mobile pada layar desktop */
+@media (min-width: 1024px) {
+    .fi-topbar-open-sidebar-btn,
+    .fi-topbar-close-sidebar-btn {
+        display: none !important;
+    }
+}
+
+/* Tema Terang: Tombol Garis 3 */
+html:not(.dark) .fi-topbar-open-collapse-sidebar-btn,
+html:not(.dark) .fi-topbar-close-collapse-sidebar-btn,
+html:not(.dark) .fi-topbar-open-sidebar-btn,
+html:not(.dark) .fi-topbar-close-sidebar-btn {
+    color: #334155 !important;
+    background-color: #f1f5f9 !important;
+    border: 1px solid #cbd5e1 !important;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.04) !important;
+}
+
+html:not(.dark) .fi-topbar-open-collapse-sidebar-btn:hover,
+html:not(.dark) .fi-topbar-close-collapse-sidebar-btn:hover,
+html:not(.dark) .fi-topbar-open-sidebar-btn:hover,
+html:not(.dark) .fi-topbar-close-sidebar-btn:hover {
+    color: #1d4ed8 !important;
+    background-color: #e2e8f0 !important;
+    border-color: #94a3b8 !important;
+    transform: scale(1.05) !important;
+    box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+}
+
+html:not(.dark) .fi-topbar-open-collapse-sidebar-btn:active,
+html:not(.dark) .fi-topbar-close-collapse-sidebar-btn:active,
+html:not(.dark) .fi-topbar-open-sidebar-btn:active,
+html:not(.dark) .fi-topbar-close-sidebar-btn:active {
+    transform: scale(0.96) !important;
+    background-color: #cbd5e1 !important;
+}
+
+/* Tema Gelap: Tombol Garis 3 */
+html.dark .fi-topbar-open-collapse-sidebar-btn,
+html.dark .fi-topbar-close-collapse-sidebar-btn,
+html.dark .fi-topbar-open-sidebar-btn,
+html.dark .fi-topbar-close-sidebar-btn {
+    color: #cbd5e1 !important;
+    background-color: #1e293b !important;
+    border: 1px solid #334155 !important;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.3) !important;
+}
+
+html.dark .fi-topbar-open-collapse-sidebar-btn:hover,
+html.dark .fi-topbar-close-collapse-sidebar-btn:hover,
+html.dark .fi-topbar-open-sidebar-btn:hover,
+html.dark .fi-topbar-close-sidebar-btn:hover {
+    color: #60a5fa !important;
+    background-color: #334155 !important;
+    border-color: #475569 !important;
+    transform: scale(1.05) !important;
+    box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.4) !important;
+}
+
+html.dark .fi-topbar-open-collapse-sidebar-btn:active,
+html.dark .fi-topbar-close-collapse-sidebar-btn:active,
+html.dark .fi-topbar-open-sidebar-btn:active,
+html.dark .fi-topbar-close-sidebar-btn:active {
+    transform: scale(0.96) !important;
+    background-color: #475569 !important;
+}
+
+/* Micro-transition icon garis 3 yang interaktif */
+.fi-topbar-open-collapse-sidebar-btn .fi-icon,
+.fi-topbar-close-collapse-sidebar-btn .fi-icon,
+.fi-topbar-open-sidebar-btn .fi-icon,
+.fi-topbar-close-sidebar-btn .fi-icon {
+    width: 1.25rem !important;
+    height: 1.25rem !important;
+    transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1), color 200ms ease-in-out !important;
+}
+
+.fi-topbar-close-collapse-sidebar-btn:hover .fi-icon {
+    transform: rotate(90deg) !important;
+}
+
+.fi-topbar-open-collapse-sidebar-btn:hover .fi-icon {
+    transform: rotate(-90deg) !important;
+}
+
+/* 3. Sidebar Footer & User Menu Dropdown */
+.fi-sidebar-footer {
+    padding: 0.625rem 0.75rem !important;
+    transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+html:not(.dark) .fi-sidebar-footer {
+    border-top: 1px solid rgba(203, 213, 225, 0.8) !important;
+    background-color: rgba(241, 245, 249, 0.6) !important;
+}
+
+html.dark .fi-sidebar-footer {
+    border-top: 1px solid rgba(30, 41, 59, 0.8) !important;
+    background-color: rgba(15, 23, 42, 0.5) !important;
+}
+
+.fi-sidebar .fi-user-menu-trigger {
+    border-radius: 0.625rem !important;
+    padding: 0.5rem 0.625rem !important;
+    transition: all 200ms ease-in-out !important;
+    gap: 0.625rem !important;
+}
+
+html:not(.dark) .fi-sidebar .fi-user-menu-trigger {
+    color: #1e293b !important;
+}
+
+html:not(.dark) .fi-sidebar .fi-user-menu-trigger:hover {
+    background-color: #dbe2ec !important;
+    color: #0f172a !important;
+}
+
+html.dark .fi-sidebar .fi-user-menu-trigger {
+    color: #f1f5f9 !important;
+}
+
+html.dark .fi-sidebar .fi-user-menu-trigger:hover {
+    background-color: rgba(255, 255, 255, 0.08) !important;
+    color: #ffffff !important;
+}
+
+.fi-sidebar .fi-user-menu-trigger-text {
+    font-weight: 600 !important;
+    font-size: 0.875rem !important;
+    letter-spacing: 0.01em !important;
+}
+
+/* Avatar styling */
+.fi-sidebar .fi-user-avatar {
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1) !important;
+    border: 1.5px solid #2563eb !important;
+    border-radius: 9999px !important;
+}
+
+/* User Menu Dropdown Panel Pop-up styling */
+.fi-sidebar .fi-dropdown-panel {
+    border-radius: 0.75rem !important;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
+}
+
+html:not(.dark) .fi-sidebar .fi-dropdown-panel {
+    background-color: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+}
+
+html.dark .fi-sidebar .fi-dropdown-panel {
+    background-color: #0f172a !important;
+    border: 1px solid #334155 !important;
+}
+
+/* ==========================================================================
+   MULTI-MONITOR LAYOUT & FLUID SIZING OPTIMIZATION (13", 14", 15"+ DISPLAYS)
+   ========================================================================== */
+
+.fi-main {
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+.fi-page {
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+.fi-main-ctn {
+    padding-left: clamp(1rem, 2vw, 2.25rem) !important;
+    padding-right: clamp(1rem, 2vw, 2.25rem) !important;
+    padding-top: 1.5rem !important;
+    padding-bottom: 2.5rem !important;
+}
+
+/* Optimasi Kartu Konten & Formulir agar Lega di Seluruh Ukuran Monitor */
+.fi-section {
+    width: 100% !important;
+}
+
+/* Breadcrumb & Header Titling di Monitor Besar */
+.fi-header-heading {
+    font-size: clamp(1.4rem, 1.8vw, 2rem) !important;
+    font-weight: 800 !important;
+    letter-spacing: -0.02em !important;
+}
+
+
 

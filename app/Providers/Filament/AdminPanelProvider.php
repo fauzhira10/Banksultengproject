@@ -2,12 +2,14 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Pages\Auth\EditProfile;
 use App\Filament\Pages\Auth\Login;
 use App\Filament\Resources\Terminals\Pages\ListTerminals;
 use App\Filament\Resources\Terminals\Pages\ViewTerminal;
 use App\Filament\Resources\Tikets\Pages\ListTikets;
 use App\Filament\Resources\Tikets\Pages\ViewTiket;
 use Filament\Enums\ThemeMode;
+use Filament\Enums\UserMenuPosition;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -15,6 +17,9 @@ use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use Filament\Support\Enums\Width;
+use Filament\Support\Icons\Heroicon;
+use Filament\View\PanelsIconAlias;
 use Filament\View\PanelsRenderHook;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
@@ -33,10 +38,22 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->homeUrl('/admin/tikets')
             ->login(Login::class)
+            ->profile(EditProfile::class, isSimple: false)
+            ->userMenu(position: UserMenuPosition::Sidebar)
+            ->icons([
+                PanelsIconAlias::SIDEBAR_EXPAND_BUTTON => Heroicon::OutlinedBars3,
+                PanelsIconAlias::SIDEBAR_EXPAND_BUTTON_RTL => Heroicon::OutlinedBars3,
+                PanelsIconAlias::SIDEBAR_COLLAPSE_BUTTON => Heroicon::OutlinedBars3,
+                PanelsIconAlias::SIDEBAR_COLLAPSE_BUTTON_RTL => Heroicon::OutlinedBars3,
+                PanelsIconAlias::TOPBAR_OPEN_SIDEBAR_BUTTON => Heroicon::OutlinedBars3,
+                PanelsIconAlias::TOPBAR_CLOSE_SIDEBAR_BUTTON => Heroicon::OutlinedBars3,
+            ])
             ->brandName('Monitoring SLA ATM - Bank Sulteng')
             ->sidebarCollapsibleOnDesktop()
+            ->sidebarWidth('16.5rem')
+            ->maxContentWidth(Width::Full)
             ->defaultThemeMode(ThemeMode::Light)
-            ->darkMode(true)
+            ->darkMode(false)
             ->colors([
                 'primary' => Color::Blue,
                 'purple' => Color::Purple,
@@ -48,10 +65,6 @@ class AdminPanelProvider extends PanelProvider
             ->renderHook(
                 PanelsRenderHook::HEAD_END,
                 fn () => view('filament.hooks.vite-styles'),
-            )
-            ->renderHook(
-                PanelsRenderHook::USER_MENU_BEFORE,
-                fn () => view('filament.hooks.topbar-theme-switcher'),
             )
             ->renderHook(
                 PanelsRenderHook::BODY_END,

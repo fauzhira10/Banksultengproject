@@ -18,7 +18,7 @@ class VendorsTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->searchPlaceholder('Cari Nama Vendor, Kontak / PIC, Keterangan...')
+            ->searchPlaceholder('Cari Nama Vendor...')
             ->searchDebounce('400ms')
             ->columns([
                 TextColumn::make('nama_vendor')
@@ -32,17 +32,6 @@ class VendorsTable
                     ->counts('terminals')
                     ->badge()
                     ->color('primary'),
-
-                TextColumn::make('kontak')
-                    ->label('Kontak / PIC')
-                    ->searchable()
-                    ->placeholder('-'),
-
-                TextColumn::make('keterangan')
-                    ->label('Keterangan')
-                    ->searchable()
-                    ->placeholder('-')
-                    ->wrap(),
             ])
             ->filters([
                 TernaryFilter::make('has_terminals')

@@ -1,6 +1,7 @@
 <x-filament-panels::page>
     @php
         $report = $this->reportData;
+        $paginatedRows = $this->paginatedRows;
         $vendorName = strtoupper($this->selectedVendorName);
         $monthName = strtoupper($this->selectedMonthName);
         $year = $this->tahun;
@@ -230,11 +231,16 @@
             </div>
 
             <!-- Counter Info Data -->
-            <div class="flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-300">
+            <div class="flex flex-wrap items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-300">
                 <span>Ditemukan:</span>
                 <span class="inline-flex items-center rounded-xl bg-slate-100 border border-slate-300 px-3 py-1 font-black text-slate-900 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
                     {{ count($report['rows']) }} Mesin ATM/CRM
                 </span>
+                @if ($paginatedRows->hasPages())
+                    <span class="inline-flex items-center rounded-xl bg-blue-50 border border-blue-200 px-2.5 py-1 text-xs font-extrabold text-blue-700 dark:bg-blue-950/60 dark:border-blue-800 dark:text-blue-300">
+                        Hal. {{ $paginatedRows->currentPage() }} dari {{ $paginatedRows->lastPage() }}
+                    </span>
+                @endif
             </div>
         </div>
 
@@ -379,8 +385,8 @@
 
     <!-- 5. Lembar Tabel Data SLA Modern & Ramah Lansia (Kontras Tinggi, Font Jelas, Zebra Striping) -->
     <div class="print-container relative mt-6 overflow-hidden rounded-2xl border-2 border-slate-300 bg-white shadow-sm transition-colors dark:border-slate-800 dark:bg-slate-900">
-        <!-- Overlay Loading Saat Ganti Vendor / Filter / Bulan -->
-        <div wire:loading.delay.shorter wire:target="vendor_id,bulan,tahun,search,resetFilters" class="no-print absolute inset-0 z-20 flex items-center justify-center bg-white/70 backdrop-blur-[2px] transition-all dark:bg-slate-900/70">
+        <!-- Overlay Loading Saat Ganti Vendor / Filter / Bulan / Halaman -->
+        <div wire:loading.delay.shorter wire:target="vendor_id,bulan,tahun,search,resetFilters,gotoPage,previousPage,nextPage,setPage" class="no-print absolute inset-0 z-20 flex items-center justify-center bg-white/70 backdrop-blur-[2px] transition-all dark:bg-slate-900/70">
             <div class="inline-flex items-center gap-3 rounded-2xl bg-slate-900 px-5 py-3 text-sm font-bold text-white shadow-2xl ring-1 ring-white/20 dark:bg-slate-800">
                 <svg class="h-5 w-5 animate-spin text-blue-400" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -432,7 +438,7 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y-2 divide-slate-200 dark:divide-slate-800">
-                    @forelse ($report['rows'] as $row)
+                    @forelse ($paginatedRows as $row)
                         @php
                             $hasProblem = $row['downtime_menit'] > 0;
                             $pct = $row['uptime_persen'];
@@ -552,8 +558,8 @@
                     @endforelse
                 </tbody>
 
-                <!-- Footer Total & SLA Rata-rata -->
-                @if (count($report['rows']) > 0)
+                <!-- Footer Total & SLA Rata-rata (Hanya tampil di halaman terakhir jika memiliki lebih dari 1 halaman) -->
+                @if (count($report['rows']) > 0 && (! $paginatedRows->hasMorePages()))
                     <tfoot>
                         <tr class="border-t-4 border-slate-400 bg-slate-200/95 font-extrabold text-slate-900 dark:border-slate-600 dark:bg-slate-800 dark:text-white">
                             <td colspan="4" class="px-6 py-4.5 text-right text-sm uppercase tracking-wider">
@@ -578,5 +584,66 @@
                 @endif
             </table>
         </div>
+
+        <!-- 6. Kontrol Navigasi Halaman / Paginasi (Maksimal 100 Baris) -->
+        @if ($paginatedRows->hasPages())
+            <div class="no-print flex flex-col items-center justify-between gap-4 border-t-2 border-slate-200 bg-slate-50/90 px-6 py-4 sm:flex-row dark:border-slate-800 dark:bg-slate-900/90">
+                <!-- Info Posisi Baris -->
+                <div class="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                    Menampilkan <strong class="font-extrabold text-slate-900 dark:text-white">{{ number_format($paginatedRows->firstItem(), 0, ',', '.') }}</strong>
+                    sampai <strong class="font-extrabold text-slate-900 dark:text-white">{{ number_format($paginatedRows->lastItem(), 0, ',', '.') }}</strong>
+                    dari total <strong class="font-extrabold text-slate-900 dark:text-white">{{ number_format($paginatedRows->total(), 0, ',', '.') }}</strong> unit mesin
+                    <span class="text-xs font-medium text-slate-500 dark:text-slate-400">(dibatasi 100 baris per halaman)</span>
+                </div>
+
+                <!-- Tombol Navigasi Halaman -->
+                <nav class="flex items-center gap-1.5" aria-label="Navigasi Halaman Laporan SLA">
+                    <!-- Tombol Halaman Sebelumnya -->
+                    <button
+                        type="button"
+                        wire:click="previousPage"
+                        wire:loading.attr="disabled"
+                        @if ($paginatedRows->onFirstPage()) disabled @endif
+                        class="inline-flex min-h-[38px] items-center gap-1.5 rounded-xl border-2 px-3.5 py-1.5 text-xs sm:text-sm font-bold transition-all {{ $paginatedRows->onFirstPage() ? 'border-slate-200 bg-slate-100 text-slate-400 cursor-not-allowed dark:border-slate-800 dark:bg-slate-800/50 dark:text-slate-600' : 'border-slate-300 bg-white text-slate-700 shadow-xs hover:border-blue-500 hover:bg-blue-50 hover:text-blue-700 cursor-pointer dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700' }}"
+                        title="Halaman Sebelumnya"
+                    >
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+                        </svg>
+                        <span>Sebelumnya</span>
+                    </button>
+
+                    <!-- Tombol Nomor Halaman -->
+                    <div class="flex items-center gap-1">
+                        @foreach ($paginatedRows->getUrlRange(1, $paginatedRows->lastPage()) as $pageNumber => $pageUrl)
+                            <button
+                                type="button"
+                                wire:click="gotoPage({{ $pageNumber }})"
+                                wire:loading.attr="disabled"
+                                class="inline-flex h-[38px] min-w-[38px] items-center justify-center rounded-xl border-2 px-2 text-sm font-bold transition-all cursor-pointer {{ $pageNumber == $paginatedRows->currentPage() ? 'border-blue-600 bg-blue-600 text-white shadow-sm ring-2 ring-blue-500/20' : 'border-slate-300 bg-white text-slate-700 hover:border-blue-500 hover:bg-blue-50 hover:text-blue-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700' }}"
+                                aria-label="Menuju Halaman {{ $pageNumber }}"
+                            >
+                                {{ $pageNumber }}
+                            </button>
+                        @endforeach
+                    </div>
+
+                    <!-- Tombol Halaman Selanjutnya -->
+                    <button
+                        type="button"
+                        wire:click="nextPage"
+                        wire:loading.attr="disabled"
+                        @if (! $paginatedRows->hasMorePages()) disabled @endif
+                        class="inline-flex min-h-[38px] items-center gap-1.5 rounded-xl border-2 px-3.5 py-1.5 text-xs sm:text-sm font-bold transition-all {{ ! $paginatedRows->hasMorePages() ? 'border-slate-200 bg-slate-100 text-slate-400 cursor-not-allowed dark:border-slate-800 dark:bg-slate-800/50 dark:text-slate-600' : 'border-slate-300 bg-white text-slate-700 shadow-xs hover:border-blue-500 hover:bg-blue-50 hover:text-blue-700 cursor-pointer dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700' }}"
+                        title="Halaman Selanjutnya"
+                    >
+                        <span>Selanjutnya</span>
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                        </svg>
+                    </button>
+                </nav>
+            </div>
+        @endif
     </div>
 </x-filament-panels::page>
