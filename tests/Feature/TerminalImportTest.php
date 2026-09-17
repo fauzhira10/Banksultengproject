@@ -195,7 +195,32 @@ class TerminalImportTest extends TestCase
         $response = $service->generateTemplate();
 
         $this->assertSame('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', $response->headers->get('Content-Type'));
-        $this->assertStringContainsString('Template_Import_ATM_Bank_Sulteng.xlsx', (string) $response->headers->get('Content-Disposition'));
+        $this->assertStringContainsString('Data_Terminal_ATM_CRM_Bank_Sulteng.xlsx', (string) $response->headers->get('Content-Disposition'));
+    }
+
+    public function test_terminal_template_service_exports_database_records(): void
+    {
+        $cabang = Cabang::create([
+            'kode_cabang' => '001',
+            'nama_cabang' => 'Utama Palu',
+            'label_cabang' => '001-Utama Palu',
+        ]);
+        $vendor = Vendor::create(['nama_vendor' => 'PT SRISHINDU INFORMATIKA']);
+
+        Terminal::create([
+            'profil' => 'WCR.KCU99',
+            'cabang_id' => $cabang->id,
+            'vendor_id' => $vendor->id,
+            'nama_lokasi' => 'Galeri ATM Utama',
+            'tipe_mesin' => 'Wincor 280',
+            'kategori' => 'ATM',
+        ]);
+
+        $service = new TerminalTemplateService;
+        $response = $service->generateTemplate();
+
+        $this->assertSame('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', $response->headers->get('Content-Type'));
+        $this->assertStringContainsString('Data_Terminal_ATM_CRM_Bank_Sulteng.xlsx', (string) $response->headers->get('Content-Disposition'));
     }
 
     public function test_artisan_command_terminal_import(): void

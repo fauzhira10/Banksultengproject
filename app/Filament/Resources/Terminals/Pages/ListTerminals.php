@@ -26,7 +26,7 @@ class ListTerminals extends ListRecords
     {
         return [
             Action::make('downloadTemplate')
-                ->label('Download Template')
+                ->label('Ekspor Data Excel')
                 ->icon('heroicon-m-arrow-down-tray')
                 ->color('gray')
                 ->action(fn (TerminalTemplateService $service) => $service->generateTemplate()),
