@@ -1060,8 +1060,15 @@ html.dark .fi-ta-filter-indicators {
 .fi-topbar-close-collapse-sidebar-btn,
 .fi-topbar-open-sidebar-btn,
 .fi-topbar-close-sidebar-btn {
-    border-radius: 0.5rem !important;
+    width: 2.625rem !important;
+    height: 2.625rem !important;
+    min-width: 2.625rem !important;
+    min-height: 2.625rem !important;
+    margin: 0 !important;
+    border-radius: 0.625rem !important;
     cursor: pointer !important;
+    align-items: center !important;
+    justify-content: center !important;
     transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
@@ -1146,9 +1153,17 @@ html.dark .fi-topbar-close-sidebar-btn:active {
 .fi-topbar-close-collapse-sidebar-btn .fi-icon,
 .fi-topbar-open-sidebar-btn .fi-icon,
 .fi-topbar-close-sidebar-btn .fi-icon {
-    width: 1.25rem !important;
-    height: 1.25rem !important;
+    width: 1.625rem !important;
+    height: 1.625rem !important;
+    stroke-width: 2.2 !important;
     transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1), color 200ms ease-in-out !important;
+}
+
+.fi-topbar-open-collapse-sidebar-btn .fi-icon path,
+.fi-topbar-close-collapse-sidebar-btn .fi-icon path,
+.fi-topbar-open-sidebar-btn .fi-icon path,
+.fi-topbar-close-sidebar-btn .fi-icon path {
+    stroke-width: 2.2 !important;
 }
 
 .fi-topbar-close-collapse-sidebar-btn:hover .fi-icon {
@@ -1325,4 +1340,72 @@ td:has(.bs-terminals-count-col) .fi-badge .fi-icon,
     text-overflow: clip !important;
     word-break: normal !important;
 }
+
+/* ==========================================================================
+   NAVBAR (TOPBAR): LOGO BANK SULTENG DI TENGAH & PENATAAN JUDUL SLA
+   ========================================================================== */
+.fi-topbar {
+    position: relative !important;
+}
+
+/* 1. Posisi Logo Bank Sulteng di Tengah Navbar */
+.bs-topbar-center-logo {
+    position: absolute !important;
+    left: 50% !important;
+    top: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    pointer-events: auto !important;
+    z-index: 20 !important;
+}
+
+.bs-topbar-center-logo img {
+    user-select: none !important;
+    -webkit-user-drag: none !important;
+}
+
+/* 2. Penataan Layout Judul "Monitoring SLA ATM" di Topbar */
+.fi-topbar-start {
+    display: flex !important;
+    align-items: center !important;
+    gap: 1rem !important;
+}
+
+.fi-topbar-start .fi-topbar-collapse-sidebar-btn-ctn {
+    display: flex !important;
+    align-items: center !important;
+    height: 2.625rem !important;
+    padding-right: 1rem !important;
+    border-right: 1px solid #e2e8f0 !important;
+}
+
+html.dark .fi-topbar-start .fi-topbar-collapse-sidebar-btn-ctn {
+    border-right-color: #334155 !important;
+}
+
+.fi-topbar-start .fi-logo,
+.fi-sidebar-header .fi-logo {
+    height: auto !important;
+    max-height: none !important;
+    line-height: normal !important;
+}
+
+.fi-topbar-start a,
+.fi-sidebar-header a {
+    text-decoration: none !important;
+    display: inline-flex !important;
+    align-items: center !important;
+}
+
+/* Efek hover lembut pada judul sistem */
+.bs-brand-title:hover .bs-brand-title-text {
+    color: #2563eb !important;
+}
+
+html.dark .bs-brand-title:hover .bs-brand-title-text {
+    color: #60a5fa !important;
+}
+
 

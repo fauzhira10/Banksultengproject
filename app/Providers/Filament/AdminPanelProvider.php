@@ -49,7 +49,9 @@ class AdminPanelProvider extends PanelProvider
                 PanelsIconAlias::TOPBAR_OPEN_SIDEBAR_BUTTON => Heroicon::OutlinedBars3,
                 PanelsIconAlias::TOPBAR_CLOSE_SIDEBAR_BUTTON => Heroicon::OutlinedBars3,
             ])
-            ->brandName('Monitoring SLA ATM - Bank Sulteng')
+            ->brandName('Monitoring SLA ATM')
+            ->brandLogo(fn () => view('filament.components.brand-logo'))
+            ->brandLogoHeight('auto')
             ->font('Plus Jakarta Sans')
             ->monoFont('JetBrains Mono')
             ->sidebarCollapsibleOnDesktop()
@@ -61,6 +63,10 @@ class AdminPanelProvider extends PanelProvider
                 'primary' => Color::Blue,
                 'purple' => Color::Purple,
             ])
+            ->renderHook(
+                PanelsRenderHook::TOPBAR_END,
+                fn () => view('filament.hooks.topbar-center-logo'),
+            )
             ->renderHook(
                 PanelsRenderHook::HEAD_START,
                 fn () => view('filament.hooks.head-theme'),
