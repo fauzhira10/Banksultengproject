@@ -3,7 +3,10 @@
 namespace App\Services;
 
 use App\Models\Terminal;
+use DateInterval;
+use DateTimeInterface;
 use OpenSpout\Common\Entity\Cell;
+use OpenSpout\Common\Entity\Cell\StringCell;
 use OpenSpout\Common\Entity\Row;
 use OpenSpout\Common\Entity\Style\Border;
 use OpenSpout\Common\Entity\Style\BorderPart;
@@ -74,7 +77,7 @@ class TerminalTemplateService
             'Keterangan',
         ];
 
-        $headerCells = array_map(fn (string $h) => Cell::fromValue($h, $headerStyle), $headers);
+        $headerCells = array_map(fn (string $h) => $this->makeTextSafeCell($h, $headerStyle), $headers);
         $headerRow = new Row($headerCells);
         $headerRow->setHeight(30);
         $writer->addRow($headerRow);
@@ -96,19 +99,19 @@ class TerminalTemplateService
                     ?? '';
 
                 $rowCells = [
-                    Cell::fromValue((string) ($terminal->profil ?? ''), $centerStyle),
-                    Cell::fromValue((string) $cabangLabel, $leftStyle),
-                    Cell::fromValue($terminal->urutan_cabang ?? '', $centerStyle),
-                    Cell::fromValue((string) ($terminal->nama_lokasi ?? ''), $leftStyle),
-                    Cell::fromValue((string) ($terminal->ip_address ?? ''), $centerStyle),
-                    Cell::fromValue((string) ($terminal->luno ?? ''), $centerStyle),
-                    Cell::fromValue((string) ($terminal->port ?? ''), $centerStyle),
-                    Cell::fromValue((string) $vendorName, $leftStyle),
-                    Cell::fromValue((string) ($terminal->serial_number ?? ''), $centerStyle),
-                    Cell::fromValue((string) ($terminal->tipe_mesin ?? ''), $leftStyle),
-                    Cell::fromValue((string) ($terminal->kategori ?? 'ATM'), $centerStyle),
-                    Cell::fromValue((string) ($terminal->denom ?? ''), $centerStyle),
-                    Cell::fromValue((string) ($terminal->keterangan ?? ''), $leftStyle),
+                    $this->makeTextSafeCell((string) ($terminal->profil ?? ''), $centerStyle),
+                    $this->makeTextSafeCell((string) $cabangLabel, $leftStyle),
+                    $this->makeTextSafeCell($terminal->urutan_cabang ?? '', $centerStyle),
+                    $this->makeTextSafeCell((string) ($terminal->nama_lokasi ?? ''), $leftStyle),
+                    $this->makeTextSafeCell((string) ($terminal->ip_address ?? ''), $centerStyle),
+                    $this->makeTextSafeCell((string) ($terminal->luno ?? ''), $centerStyle),
+                    $this->makeTextSafeCell((string) ($terminal->port ?? ''), $centerStyle),
+                    $this->makeTextSafeCell((string) $vendorName, $leftStyle),
+                    $this->makeTextSafeCell((string) ($terminal->serial_number ?? ''), $centerStyle),
+                    $this->makeTextSafeCell((string) ($terminal->tipe_mesin ?? ''), $leftStyle),
+                    $this->makeTextSafeCell((string) ($terminal->kategori ?? 'ATM'), $centerStyle),
+                    $this->makeTextSafeCell((string) ($terminal->denom ?? ''), $centerStyle),
+                    $this->makeTextSafeCell((string) ($terminal->keterangan ?? ''), $leftStyle),
                 ];
                 $dataRow = new Row($rowCells);
                 $dataRow->setHeight(22);
@@ -166,19 +169,19 @@ class TerminalTemplateService
 
             foreach ($samples as $sample) {
                 $rowCells = [
-                    Cell::fromValue($sample['profil'], $centerStyle),
-                    Cell::fromValue($sample['cabang'], $leftStyle),
-                    Cell::fromValue($sample['urutan'], $centerStyle),
-                    Cell::fromValue($sample['lokasi'], $leftStyle),
-                    Cell::fromValue($sample['ip'], $centerStyle),
-                    Cell::fromValue($sample['luno'], $centerStyle),
-                    Cell::fromValue($sample['port'], $centerStyle),
-                    Cell::fromValue($sample['vendor'], $leftStyle),
-                    Cell::fromValue($sample['sn'], $centerStyle),
-                    Cell::fromValue($sample['tipe'], $leftStyle),
-                    Cell::fromValue($sample['kategori'], $centerStyle),
-                    Cell::fromValue($sample['denom'], $centerStyle),
-                    Cell::fromValue($sample['keterangan'], $leftStyle),
+                    $this->makeTextSafeCell($sample['profil'], $centerStyle),
+                    $this->makeTextSafeCell($sample['cabang'], $leftStyle),
+                    $this->makeTextSafeCell($sample['urutan'], $centerStyle),
+                    $this->makeTextSafeCell($sample['lokasi'], $leftStyle),
+                    $this->makeTextSafeCell($sample['ip'], $centerStyle),
+                    $this->makeTextSafeCell($sample['luno'], $centerStyle),
+                    $this->makeTextSafeCell($sample['port'], $centerStyle),
+                    $this->makeTextSafeCell($sample['vendor'], $leftStyle),
+                    $this->makeTextSafeCell($sample['sn'], $centerStyle),
+                    $this->makeTextSafeCell($sample['tipe'], $leftStyle),
+                    $this->makeTextSafeCell($sample['kategori'], $centerStyle),
+                    $this->makeTextSafeCell($sample['denom'], $centerStyle),
+                    $this->makeTextSafeCell($sample['keterangan'], $leftStyle),
                 ];
                 $dataRow = new Row($rowCells);
                 $dataRow->setHeight(22);
@@ -195,5 +198,14 @@ class TerminalTemplateService
                 'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
             ]
         )->deleteFileAfterSend(true);
+    }
+
+    /**
+     * OpenSpout menjadikan string berawalan "=" sebagai formula; paksa string menjadi teks
+     * agar data dari input/import tidak dieksekusi sebagai formula di Excel.
+     */
+    protected function makeTextSafeCell(bool|DateInterval|DateTimeInterface|float|int|string|null $value, ?Style $style = null): Cell
+    {
+        return is_string($value) ? new StringCell($value, $style) : Cell::fromValue($value, $style);
     }
 }

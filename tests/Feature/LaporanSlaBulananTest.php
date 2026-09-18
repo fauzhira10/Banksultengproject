@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\Vendor;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Livewire\Features\SupportLockedProperties\CannotUpdateLockedPropertyException;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -140,5 +141,25 @@ class LaporanSlaBulananTest extends TestCase
         $component->call('previousPage');
         $paginatedPage1 = $component->get('paginatedRows');
         $this->assertEquals(1, $paginatedPage1->currentPage());
+    }
+
+    public function test_pagination_size_cannot_be_changed_from_the_browser(): void
+    {
+        $this->actingAs(User::factory()->create());
+
+        $this->expectException(CannotUpdateLockedPropertyException::class);
+
+        Livewire::test(LaporanSlaBulanan::class)->set('perPage', 0);
+    }
+
+    public function test_out_of_range_period_from_the_browser_is_clamped(): void
+    {
+        $this->actingAs(User::factory()->create());
+
+        Livewire::test(LaporanSlaBulanan::class)
+            ->set('bulan', '13')
+            ->assertSet('bulan', '12')
+            ->set('tahun', '99999')
+            ->assertSet('tahun', (string) ((int) date('Y') + 1));
     }
 }

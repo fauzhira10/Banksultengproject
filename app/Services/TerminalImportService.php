@@ -15,6 +15,11 @@ use OpenSpout\Reader\XLSX\Reader as XlsxReader;
 class TerminalImportService
 {
     /**
+     * Jumlah maksimal baris data yang diproses dalam satu kali import.
+     */
+    public const MAX_ROWS = 5000;
+
+    /**
      * Map header aliases to target database fields.
      *
      * @var array<string, array<int, string>>
@@ -115,6 +120,12 @@ class TerminalImportService
                     continue;
                 }
 
+                if ($stats['total'] >= self::MAX_ROWS) {
+                    $stats['errors'][$rowNumber] = 'Batas maksimal '.number_format(self::MAX_ROWS, 0, ',', '.')." baris tercapai; baris {$rowNumber} dan seterusnya tidak diproses.";
+
+                    break;
+                }
+
                 $stats['total']++;
 
                 // Validate mandatory fields
@@ -153,7 +164,9 @@ class TerminalImportService
                         $stats['created']++;
                     }
                 } catch (\Throwable $e) {
-                    $stats['errors'][$rowNumber] = "Baris {$rowNumber} (Profil {$profil}): {$e->getMessage()}";
+                    report($e);
+
+                    $stats['errors'][$rowNumber] = "Baris {$rowNumber} (Profil {$profil}): data tidak dapat disimpan, periksa kembali isian baris ini.";
                 }
             }
 

@@ -11,6 +11,12 @@ class TiketSampleSeeder extends Seeder
 {
     public function run(): void
     {
+        if (app()->isProduction()) {
+            $this->command?->warn('TiketSampleSeeder berisi data contoh dan tidak dijalankan di production.');
+
+            return;
+        }
+
         $samples = [
             [
                 'nomor_tiket' => 'BST2412020246',

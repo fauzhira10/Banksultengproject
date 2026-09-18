@@ -114,4 +114,16 @@ return [
 
     'password_timeout' => env('AUTH_PASSWORD_TIMEOUT', 10800),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Initial Administrator Password
+    |--------------------------------------------------------------------------
+    |
+    | Kata sandi awal akun administrator yang dibuat oleh DatabaseSeeder.
+    | Jika kosong, kata sandi acak akan dibuat dan ditampilkan satu kali.
+    |
+    */
+
+    'initial_admin_password' => env('ADMIN_INITIAL_PASSWORD'),
+
 ];

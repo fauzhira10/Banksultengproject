@@ -16,6 +16,7 @@ use OpenSpout\Common\Entity\Row;
 use OpenSpout\Writer\XLSX\Options;
 use OpenSpout\Writer\XLSX\Writer;
 use Tests\TestCase;
+use ZipArchive;
 
 class TerminalImportTest extends TestCase
 {
@@ -293,5 +294,44 @@ class TerminalImportTest extends TestCase
         $this->assertTrue($t2->is_hibah);
         $this->assertSame('KOPERASI BANK SULTENG', $t2->vendor_text);
         $this->assertSame($koperasi->id, $t2->vendor_id);
+    }
+
+    public function test_terminal_export_writes_formula_like_values_as_plain_text(): void
+    {
+        Terminal::create([
+            'profil' => 'WCR.FORMULA',
+            'nama_lokasi' => '=HYPERLINK("http://contoh.test","klik")',
+            'kategori' => 'ATM',
+        ]);
+
+        $filePath = (new TerminalTemplateService)->generateTemplate()->getFile()->getPathname();
+
+        $zip = new ZipArchive;
+        $zip->open($filePath);
+        $sheetXml = (string) $zip->getFromName('xl/worksheets/sheet1.xml');
+        $sharedStringsXml = (string) $zip->getFromName('xl/sharedStrings.xml');
+        $zip->close();
+        unlink($filePath);
+
+        $this->assertStringNotContainsString('<f>', $sheetXml);
+        $this->assertStringContainsString('=HYPERLINK', html_entity_decode($sheetXml.$sharedStringsXml));
+    }
+
+    public function test_import_stops_after_the_maximum_number_of_rows(): void
+    {
+        $rows = ['Profil,Nama Lokasi'];
+        for ($i = 1; $i <= TerminalImportService::MAX_ROWS + 1; $i++) {
+            $rows[] = "WCR.T{$i},Lokasi {$i}";
+        }
+
+        $tempCsv = tempnam(sys_get_temp_dir(), 'test_csv_').'.csv';
+        file_put_contents($tempCsv, implode("\n", $rows));
+
+        $stats = (new TerminalImportService)->import($tempCsv);
+        unlink($tempCsv);
+
+        $this->assertSame(TerminalImportService::MAX_ROWS, $stats['total']);
+        $this->assertStringContainsString('Batas maksimal', implode(' ', $stats['errors']));
+        $this->assertSame(TerminalImportService::MAX_ROWS, Terminal::count());
     }
 }

@@ -26,7 +26,8 @@ class EditProfile extends BaseEditProfile
                 $this->getUsernameFormComponent(),
                 $this->getEmailFormComponent()
                     ->label('Alamat Email')
-                    ->placeholder('nama@banksulteng.co.id'),
+                    ->placeholder('nama@banksulteng.co.id')
+                    ->disabled(fn (): bool => ! auth()->user()?->isAdmin()),
                 $this->getCurrentPasswordFormComponent()
                     ->label('Kata Sandi Saat Ini'),
                 $this->getPasswordFormComponent()

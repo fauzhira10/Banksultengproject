@@ -18,7 +18,7 @@ class CabangsTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->searchPlaceholder('Cari Kode Cabang, Nama Cabang, Label Standar...')
+            ->searchPlaceholder('Cari Kode atau Nama Cabang...')
             ->searchDebounce('400ms')
             ->columns([
                 TextColumn::make('kode_cabang')
@@ -35,16 +35,19 @@ class CabangsTable
                     ->searchable()
                     ->sortable(),
 
-                TextColumn::make('label_cabang')
-                    ->label('Label Standar')
-                    ->searchable(),
-
                 TextColumn::make('terminals_count')
                     ->label('Jumlah ATM/CRM')
                     ->counts('terminals')
                     ->badge()
-                    ->color('success')
-                    ->sortable(),
+                    ->icon('heroicon-m-computer-desktop')
+                    ->color(fn (?int $state): string => ($state ?? 0) > 0 ? 'success' : 'gray')
+                    ->formatStateUsing(fn (?int $state): string => ($state ?? 0).' Unit')
+                    ->tooltip(fn (?int $state): string => ($state ?? 0) > 0 ? "{$state} Unit ATM/CRM aktif di cabang ini" : 'Belum ada unit ATM/CRM terdaftar')
+                    ->alignCenter()
+                    ->sortable()
+                    ->extraAttributes([
+                        'class' => 'bs-terminals-count-col',
+                    ]),
             ])
             ->defaultSort('kode_cabang', 'asc')
             ->filters([

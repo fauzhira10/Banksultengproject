@@ -17,6 +17,7 @@ use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Support\Enums\Width;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Storage;
+use Throwable;
 
 class ListTerminals extends ListRecords
 {
@@ -32,6 +33,7 @@ class ListTerminals extends ListRecords
                 ->action(fn (TerminalTemplateService $service) => $service->generateTemplate()),
 
             Action::make('importExcel')
+                ->authorize('import')
                 ->label('Import Excel')
                 ->icon('heroicon-m-arrow-up-tray')
                 ->color('success')
@@ -50,6 +52,7 @@ class ListTerminals extends ListRecords
                         ])
                         ->disk('local')
                         ->directory('temp-imports')
+                        ->maxSize(5120)
                         ->required()
                         ->helperText('Format yang didukung: .xlsx, .xls, .csv. Pastikan menggunakan format kolom sesuai template.'),
 
@@ -84,10 +87,21 @@ class ListTerminals extends ListRecords
                     $updateExisting = (bool) ($data['update_existing'] ?? true);
                     $autoCreateRelations = (bool) ($data['auto_create_relations'] ?? true);
 
-                    $stats = $importService->import($filePath, $updateExisting, $autoCreateRelations);
+                    try {
+                        $stats = $importService->import($filePath, $updateExisting, $autoCreateRelations);
+                    } catch (Throwable $exception) {
+                        report($exception);
 
-                    // Hapus file sementara setelah diproses
-                    Storage::disk('local')->delete($attachment);
+                        Notification::make()
+                            ->title('Import Gagal')
+                            ->body('File tidak dapat diproses. Pastikan format file dan kolom sesuai template.')
+                            ->danger()
+                            ->send();
+
+                        return;
+                    } finally {
+                        Storage::disk('local')->delete($attachment);
+                    }
 
                     $summary = "Total diproses: {$stats['total']} data. (Baru: {$stats['created']}, Diperbarui: {$stats['updated']}, Dilewati: {$stats['skipped']}).";
 

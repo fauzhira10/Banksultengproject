@@ -34,9 +34,34 @@ class ProfileTest extends TestCase
         $response->assertSee('stafit');
     }
 
-    public function test_user_can_update_profile_name_and_email(): void
+    public function test_operator_cannot_change_own_email_address(): void
     {
         $user = User::factory()->create([
+            'email' => 'operator@banksulteng.co.id',
+            'password' => bcrypt('password123'),
+        ]);
+
+        $this->actingAs($user);
+
+        Livewire::test(EditProfile::class)
+            ->assertFormFieldDisabled('email')
+            ->fillForm([
+                'name' => 'Nama Baru',
+                'email' => 'lain@banksulteng.co.id',
+                'currentPassword' => 'password123',
+            ])
+            ->call('save');
+
+        $this->assertDatabaseHas('users', [
+            'id' => $user->id,
+            'name' => 'Nama Baru',
+            'email' => 'operator@banksulteng.co.id',
+        ]);
+    }
+
+    public function test_admin_can_update_profile_name_and_email(): void
+    {
+        $user = User::factory()->admin()->create([
             'name' => 'Nama Lama',
             'username' => 'petugas01',
             'email' => 'lama@banksulteng.co.id',

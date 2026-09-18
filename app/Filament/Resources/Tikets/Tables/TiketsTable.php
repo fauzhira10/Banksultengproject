@@ -195,6 +195,7 @@ class TiketsTable
             ->recordActionsAlignment('center')
             ->actions([
                 Action::make('closeTicket')
+                    ->authorize('update')
                     ->label('Tutup Tiket')
                     ->icon('heroicon-m-check-circle')
                     ->color('success')

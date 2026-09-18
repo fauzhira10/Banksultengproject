@@ -78,7 +78,7 @@ class TerminalActionsTest extends TestCase
 
     public function test_cabang_table_displays_aksi_column_with_buttons(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->admin()->create();
         Cabang::create([
             'kode_cabang' => '001',
             'nama_cabang' => 'Utama Palu',
@@ -101,7 +101,7 @@ class TerminalActionsTest extends TestCase
 
     public function test_vendor_table_displays_aksi_column_with_buttons(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->admin()->create();
         Vendor::create(['nama_vendor' => 'SRISHINDU INFORMATIKA']);
 
         $this->actingAs($user);

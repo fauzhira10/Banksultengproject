@@ -32,6 +32,15 @@ class LoginResponse implements Responsable
     {
         static::resetSessionHistory();
 
-        return redirect()->intended(TiketResource::getUrl('index'));
+        $intended = session()->pull('url.intended');
+        $tiketsUrl = TiketResource::getUrl('index');
+
+        // Langsung arahkan ke halaman utama Tiket jika intended kosong atau mengarah ke root /admin
+        // guna mencegah terjadinya double redirect (302) antar rute.
+        if (! $intended || rtrim($intended, '/') === rtrim(url('/admin'), '/') || rtrim($intended, '/') === rtrim(url('/'), '/')) {
+            return redirect()->to($tiketsUrl);
+        }
+
+        return redirect()->to($intended);
     }
 }

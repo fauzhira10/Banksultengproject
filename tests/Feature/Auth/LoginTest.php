@@ -33,10 +33,13 @@ class LoginTest extends TestCase
             'password' => Hash::make('admin123'),
         ]);
 
+        $captcha = $this->fakeLoginCaptcha();
+
         Livewire::test(Login::class)
             ->fillForm([
                 'username' => 'admin',
                 'password' => 'admin123',
+                'captcha' => $captcha,
             ])
             ->call('authenticate')
             ->assertHasNoFormErrors()
@@ -52,10 +55,13 @@ class LoginTest extends TestCase
             'password' => Hash::make('admin123'),
         ]);
 
+        $captcha = $this->fakeLoginCaptcha();
+
         Livewire::test(Login::class)
             ->fillForm([
                 'username' => 'admin',
                 'password' => 'wrongpassword',
+                'captcha' => $captcha,
             ])
             ->call('authenticate')
             ->assertHasFormErrors(['username']);
@@ -65,10 +71,13 @@ class LoginTest extends TestCase
 
     public function test_user_cannot_authenticate_with_nonexistent_username(): void
     {
+        $captcha = $this->fakeLoginCaptcha();
+
         Livewire::test(Login::class)
             ->fillForm([
                 'username' => 'nonexistent',
                 'password' => 'admin123',
+                'captcha' => $captcha,
             ])
             ->call('authenticate')
             ->assertHasFormErrors(['username']);

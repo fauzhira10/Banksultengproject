@@ -170,7 +170,7 @@ class TerminalForm
                                 ->label('Terminal ID / LUNO')
                                 ->placeholder('Contoh: 0200')
                                 ->prefixIcon('heroicon-m-identification')
-                                ->extraInputAttributes(['class' => 'font-mono font-semibold uppercase'])
+                                ->extraInputAttributes(['class' => 'font-mono font-bold text-base tracking-widest uppercase'])
                                 ->helperText('Identitas logical unit terminal switch')
                                 ->maxLength(20),
 

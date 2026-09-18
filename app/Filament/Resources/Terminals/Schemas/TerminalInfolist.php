@@ -6,6 +6,7 @@ use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Filament\Support\Enums\TextSize;
 
 class TerminalInfolist
 {
@@ -48,9 +49,15 @@ class TerminalInfolist
                             TextEntry::make('luno')
                                 ->label('ID / LUNO')
                                 ->fontFamily('mono')
+                                ->weight('bold')
                                 ->badge()
+                                ->size(TextSize::Medium)
                                 ->color('gray')
-                                ->placeholder('-'),
+                                ->copyable()
+                                ->placeholder('-')
+                                ->extraAttributes([
+                                    'class' => 'fi-luno-badge font-mono font-bold text-sm tracking-wide',
+                                ]),
 
                             TextEntry::make('port')
                                 ->label('Port Switch')
@@ -95,7 +102,18 @@ class TerminalInfolist
 
                             TextEntry::make('vendor.nama_vendor')
                                 ->label('Vendor Maintenance')
-                                ->badge(),
+                                ->badge()
+                                ->icon('heroicon-m-wrench-screwdriver')
+                                ->color(fn (?string $state): string => match ($state) {
+                                    'SRISHINDU', 'SRISHINDU INFORMATIKA' => 'purple',
+                                    'ASSINDO' => 'info',
+                                    'KOPERASI BANK SULTENG' => 'success',
+                                    'COLLEGA INTI PRATAMA' => 'warning',
+                                    'PT KIS' => 'primary',
+                                    default => 'gray',
+                                })
+                                ->columnSpan(['default' => 1, 'sm' => 2])
+                                ->wrap(),
 
                             TextEntry::make('is_hibah')
                                 ->label('Status Hibah')

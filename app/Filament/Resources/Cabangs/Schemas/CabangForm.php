@@ -23,8 +23,9 @@ class CabangForm
                     ->placeholder('Utama Palu, Toli-Toli...'),
 
                 TextInput::make('label_cabang')
-                    ->label('Label Gabungan')
-                    ->placeholder('001-Utama Palu'),
+                    ->label('Label Standar Dropdown')
+                    ->placeholder('Contoh: 001-Utama Palu')
+                    ->helperText('Otomatis terisi dari "Kode-Nama Cabang" bila dikosongkan. Digunakan untuk pilihan cabang di form Terminal, Tiket, dan Laporan SLA.'),
             ]);
     }
 }

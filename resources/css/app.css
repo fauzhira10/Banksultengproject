@@ -1,3 +1,4 @@
+@import url('https://fonts.bunny.net/css?family=plus-jakarta-sans:400,500,600,700,800|jetbrains-mono:400,500,600,700&display=swap');
 @import 'tailwindcss';
 
 @custom-variant dark (&:where(.dark, .dark *));
@@ -8,8 +9,54 @@
 @source '../../storage/framework/views/*.php';
 
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+}
+
+/* ==========================================================================
+   Tipografi Profesional & Elegan Perbankan (Plus Jakarta Sans & JetBrains Mono)
+   ========================================================================== */
+html,
+body,
+.fi-body,
+.fi-page {
+    font-family: var(--font-sans) !important;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+/* Tipografi Monospace Presisi & Angka Tabular untuk Data Teknis Perbankan */
+code,
+kbd,
+samp,
+pre,
+.font-mono,
+.fi-font-mono,
+.fi-ta-col-ip_address,
+.fi-ta-col-luno,
+.fi-ta-col-port,
+.fi-ta-col-serial_number {
+    font-family: var(--font-mono) !important;
+    font-feature-settings: 'zero' 1, 'tnum' 1;
+}
+
+/* Penataan Hirarki Judul & Teks agar Elegan & Berwibawa */
+.fi-header-heading,
+.fi-modal-heading,
+.fi-section-header-heading {
+    font-family: var(--font-sans) !important;
+    letter-spacing: -0.02em !important;
+}
+
+.fi-ta-header-cell-label {
+    font-family: var(--font-sans) !important;
+    letter-spacing: 0.025em !important;
+}
+
+.fi-sidebar-item-label,
+.fi-sidebar-group-label {
+    font-family: var(--font-sans) !important;
 }
 
 /* ==========================================================================
@@ -895,6 +942,15 @@ html.dark .fi-simple-header-subheading {
     transform: translateY(0) !important;
 }
 
+.fi-simple-main button[data-loading-active="true"],
+.fi-simple-main .fi-btn[data-loading-active="true"] {
+    cursor: wait !important;
+    opacity: 0.95 !important;
+    background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%) !important;
+    pointer-events: none !important;
+    box-shadow: 0 4px 14px 0 rgba(37, 99, 235, 0.35) !important;
+}
+
 /* ==========================================================================
    TABLE SEARCH & FILTER ENHANCEMENTS (Intuitive, High-Legibility, Senior-Friendly)
    ========================================================================== */
@@ -1206,5 +1262,67 @@ html.dark .fi-sidebar .fi-dropdown-panel {
     letter-spacing: -0.02em !important;
 }
 
+/* Penegasan Ukuran & Keterbacaan ID / LUNO Terminal ATM */
+.fi-ta-col-luno .fi-badge,
+.fi-ta-col-luno .fi-badge span,
+.fi-luno-badge,
+.fi-luno-badge span,
+.fi-infolist [data-col="luno"] .fi-badge {
+    font-size: 0.9375rem !important; /* ~15px, jelas dan proporsional */
+    font-weight: 700 !important;
+    letter-spacing: 0.06em !important;
+    padding-left: 0.625rem !important;
+    padding-right: 0.625rem !important;
+    padding-top: 0.25rem !important;
+    padding-bottom: 0.25rem !important;
+    border-radius: 0.375rem !important;
+}
 
+/* ==========================================================================
+   CABANGS TABLE: PENATAAN & TIPOGRAFI BADGE JUMLAH ATM/CRM
+   ========================================================================== */
+.bs-terminals-count-col .fi-badge,
+td:has(.bs-terminals-count-col) .fi-badge,
+.fi-ta-col-terminals_count .fi-badge {
+    font-size: 0.9375rem !important; /* ~15px - jelas, mantap, dan mudah dibaca */
+    font-weight: 700 !important;
+    padding: 0.375rem 0.875rem !important;
+    letter-spacing: 0.02em !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.375rem !important;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+    font-variant-numeric: tabular-nums !important;
+}
+
+.bs-terminals-count-col .fi-badge .fi-icon,
+td:has(.bs-terminals-count-col) .fi-badge .fi-icon,
+.fi-ta-col-terminals_count .fi-badge .fi-icon {
+    width: 1.125rem !important;
+    height: 1.125rem !important;
+}
+
+/* ==========================================================================
+   BADGE READABILITY: Mencegah Teks Terpotong pada Nama Panjang (Vendor, Infolist, dll)
+   ========================================================================== */
+.fi-infolist .fi-badge,
+.fi-badge.fi-wrapped {
+    max-width: 100% !important;
+    white-space: normal !important;
+    height: auto !important;
+    line-height: 1.4 !important;
+    padding-top: 0.35rem !important;
+    padding-bottom: 0.35rem !important;
+}
+
+.fi-infolist .fi-badge .fi-badge-label,
+.fi-infolist .fi-badge .fi-badge-label-ctn,
+.fi-badge.fi-wrapped .fi-badge-label,
+.fi-badge.fi-wrapped .fi-badge-label-ctn {
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    word-break: normal !important;
+}
 

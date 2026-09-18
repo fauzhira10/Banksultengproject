@@ -39,6 +39,7 @@ class AdminPanelProvider extends PanelProvider
             ->homeUrl('/admin/tikets')
             ->login(Login::class)
             ->profile(EditProfile::class, isSimple: false)
+            ->strictAuthorization()
             ->userMenu(position: UserMenuPosition::Sidebar)
             ->icons([
                 PanelsIconAlias::SIDEBAR_EXPAND_BUTTON => Heroicon::OutlinedBars3,
@@ -49,6 +50,8 @@ class AdminPanelProvider extends PanelProvider
                 PanelsIconAlias::TOPBAR_CLOSE_SIDEBAR_BUTTON => Heroicon::OutlinedBars3,
             ])
             ->brandName('Monitoring SLA ATM - Bank Sulteng')
+            ->font('Plus Jakarta Sans')
+            ->monoFont('JetBrains Mono')
             ->sidebarCollapsibleOnDesktop()
             ->sidebarWidth('16.5rem')
             ->maxContentWidth(Width::Full)
@@ -91,6 +94,11 @@ class AdminPanelProvider extends PanelProvider
             ->renderHook(
                 PanelsRenderHook::SIMPLE_PAGE_START,
                 fn () => view('filament.hooks.login-logo'),
+                scopes: Login::class,
+            )
+            ->renderHook(
+                PanelsRenderHook::SIMPLE_PAGE_END,
+                fn () => view('filament.hooks.login-loader'),
                 scopes: Login::class,
             )
             ->renderHook(

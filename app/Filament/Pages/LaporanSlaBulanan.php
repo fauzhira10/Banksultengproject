@@ -7,11 +7,15 @@ use App\Models\Tiket;
 use App\Models\Vendor;
 use BackedEnum;
 use Carbon\Carbon;
+use DateInterval;
+use DateTimeInterface;
 use Filament\Pages\Page;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Livewire\Attributes\Locked;
 use Livewire\WithPagination;
 use OpenSpout\Common\Entity\Cell;
+use OpenSpout\Common\Entity\Cell\StringCell;
 use OpenSpout\Common\Entity\Row;
 use OpenSpout\Common\Entity\Style\Border;
 use OpenSpout\Common\Entity\Style\BorderPart;
@@ -43,10 +47,12 @@ class LaporanSlaBulanan extends Page
 
     public string $vendor_id = '';
 
+    #[Locked]
     public int $koefisien = 44640;
 
     public string $search = '';
 
+    #[Locked]
     public int $perPage = 100;
 
     public function mount(): void
@@ -89,14 +95,25 @@ class LaporanSlaBulanan extends Page
 
     public function updatedBulan(): void
     {
+        $this->normalizePeriod();
         $this->koefisien = $this->daysInMonth * 24 * 60;
         $this->resetPage();
     }
 
     public function updatedTahun(): void
     {
+        $this->normalizePeriod();
         $this->koefisien = $this->daysInMonth * 24 * 60;
         $this->resetPage();
+    }
+
+    /**
+     * Membatasi bulan (01-12) dan tahun (2020 s.d. tahun depan) yang dikirim dari browser.
+     */
+    protected function normalizePeriod(): void
+    {
+        $this->bulan = str_pad((string) max(1, min(12, (int) $this->bulan)), 2, '0', STR_PAD_LEFT);
+        $this->tahun = (string) max(2020, min((int) date('Y') + 1, (int) $this->tahun));
     }
 
     public function updatedSearch(): void
@@ -534,28 +551,28 @@ class LaporanSlaBulanan extends Page
         // Baris 1: Judul Laporan Utama
         $title = "LAPORAN SLA ATM {$vendorName} BULAN {$monthName} {$year}";
         $titleRow = new Row([
-            Cell::fromValue($title, $titleStyle),
-            Cell::fromValue('', $titleStyle),
-            Cell::fromValue('', $titleStyle),
-            Cell::fromValue('', $titleStyle),
-            Cell::fromValue('', $titleStyle),
-            Cell::fromValue('', $titleStyle),
-            Cell::fromValue('', $titleStyle),
-            Cell::fromValue('', $titleStyle),
+            $this->makeTextSafeCell($title, $titleStyle),
+            $this->makeTextSafeCell('', $titleStyle),
+            $this->makeTextSafeCell('', $titleStyle),
+            $this->makeTextSafeCell('', $titleStyle),
+            $this->makeTextSafeCell('', $titleStyle),
+            $this->makeTextSafeCell('', $titleStyle),
+            $this->makeTextSafeCell('', $titleStyle),
+            $this->makeTextSafeCell('', $titleStyle),
         ]);
         $titleRow->setHeight(26);
         $writer->addRow($titleRow);
 
         // Baris 2: Header Kolom
         $headerRow = new Row([
-            Cell::fromValue('No', $headerBlueCenterStyle),
-            Cell::fromValue('Profil ATM', $headerBlueLeftStyle),
-            Cell::fromValue('CABANG/KCP/KAS', $headerBlueLeftStyle),
-            Cell::fromValue('', $headerBlueLeftStyle),
-            Cell::fromValue('DOWN TIME (DLM MENIT)', $headerPurpleCenterStyle),
-            Cell::fromValue('', $headerPurpleCenterStyle),
-            Cell::fromValue('KOEFISIEN', $headerPurpleCenterStyle),
-            Cell::fromValue('UPTIME (PERSEN)', $headerPurpleCenterStyle),
+            $this->makeTextSafeCell('No', $headerBlueCenterStyle),
+            $this->makeTextSafeCell('Profil ATM', $headerBlueLeftStyle),
+            $this->makeTextSafeCell('CABANG/KCP/KAS', $headerBlueLeftStyle),
+            $this->makeTextSafeCell('', $headerBlueLeftStyle),
+            $this->makeTextSafeCell('DOWN TIME (DLM MENIT)', $headerPurpleCenterStyle),
+            $this->makeTextSafeCell('', $headerPurpleCenterStyle),
+            $this->makeTextSafeCell('KOEFISIEN', $headerPurpleCenterStyle),
+            $this->makeTextSafeCell('UPTIME (PERSEN)', $headerPurpleCenterStyle),
         ]);
         $headerRow->setHeight(28);
         $writer->addRow($headerRow);
@@ -569,16 +586,16 @@ class LaporanSlaBulanan extends Page
             $pctDisplay = ((float) $pct == (int) $pct) ? (int) $pct : round((float) $pct, 0);
 
             $dataRow = new Row([
-                Cell::fromValue($row['no'], $centerStyle),
-                Cell::fromValue($row['profil'], $infoStyle),
-                Cell::fromValue($row['cabang'], $infoStyle),
-                Cell::fromValue($row['lokasi'], $infoStyle),
+                $this->makeTextSafeCell($row['no'], $centerStyle),
+                $this->makeTextSafeCell($row['profil'], $infoStyle),
+                $this->makeTextSafeCell($row['cabang'], $infoStyle),
+                $this->makeTextSafeCell($row['lokasi'], $infoStyle),
                 $row['downtime_menit'] == 0
-                    ? Cell::fromValue('-', $greenCenterStyle)
-                    : Cell::fromValue((int) $row['downtime_menit'], $greenRightNumericStyle),
-                Cell::fromValue((int) $row['uptime_menit'], $greenRightNumericStyle),
-                Cell::fromValue((int) $row['koefisien'], $rightNumericStyle),
-                Cell::fromValue((int) $pctDisplay, $rightNumericStyle),
+                    ? $this->makeTextSafeCell('-', $greenCenterStyle)
+                    : $this->makeTextSafeCell((int) $row['downtime_menit'], $greenRightNumericStyle),
+                $this->makeTextSafeCell((int) $row['uptime_menit'], $greenRightNumericStyle),
+                $this->makeTextSafeCell((int) $row['koefisien'], $rightNumericStyle),
+                $this->makeTextSafeCell((int) $pctDisplay, $rightNumericStyle),
             ]);
             $dataRow->setHeight(20);
             $writer->addRow($dataRow);
@@ -591,14 +608,14 @@ class LaporanSlaBulanan extends Page
             $slaAvgDisplay = number_format((float) $data['average_sla'], 2, ',', '.');
 
             $summaryRow = new Row([
-                Cell::fromValue('', $summaryWhiteStyle),
-                Cell::fromValue('SLA', $summaryBlueCenterStyle),
-                Cell::fromValue('', $summaryBlueCenterStyle),
-                Cell::fromValue('', $summaryBlueCenterStyle),
-                Cell::fromValue($totalDtDisplay, $summaryBlueCenterStyle),
-                Cell::fromValue('', $summaryBlueCenterStyle),
-                Cell::fromValue('', $summaryBlueCenterStyle),
-                Cell::fromValue($slaAvgDisplay, $summaryRedRightStyle),
+                $this->makeTextSafeCell('', $summaryWhiteStyle),
+                $this->makeTextSafeCell('SLA', $summaryBlueCenterStyle),
+                $this->makeTextSafeCell('', $summaryBlueCenterStyle),
+                $this->makeTextSafeCell('', $summaryBlueCenterStyle),
+                $this->makeTextSafeCell($totalDtDisplay, $summaryBlueCenterStyle),
+                $this->makeTextSafeCell('', $summaryBlueCenterStyle),
+                $this->makeTextSafeCell('', $summaryBlueCenterStyle),
+                $this->makeTextSafeCell($slaAvgDisplay, $summaryRedRightStyle),
             ]);
             $summaryRow->setHeight(26);
             $writer->addRow($summaryRow);
@@ -618,5 +635,14 @@ class LaporanSlaBulanan extends Page
     public function exportCsv(): BinaryFileResponse
     {
         return $this->exportExcel();
+    }
+
+    /**
+     * OpenSpout menjadikan string berawalan "=" sebagai formula; paksa string menjadi teks
+     * agar data dari input/import tidak dieksekusi sebagai formula di Excel.
+     */
+    protected function makeTextSafeCell(bool|DateInterval|DateTimeInterface|float|int|string|null $value, ?Style $style = null): Cell
+    {
+        return is_string($value) ? new StringCell($value, $style) : Cell::fromValue($value, $style);
     }
 }

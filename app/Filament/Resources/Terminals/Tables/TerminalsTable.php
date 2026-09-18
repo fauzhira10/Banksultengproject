@@ -11,6 +11,7 @@ use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ViewAction;
 use Filament\Support\Enums\Size;
+use Filament\Support\Enums\TextSize;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\SelectFilter;
@@ -61,13 +62,19 @@ class TerminalsTable
                     ->placeholder('-'),
 
                 TextColumn::make('luno')
-                    ->label('LUNO')
+                    ->label('ID / LUNO')
                     ->fontFamily('mono')
+                    ->weight('bold')
+                    ->badge()
+                    ->size(TextSize::Medium)
+                    ->color('gray')
                     ->searchable()
                     ->sortable()
-                    ->badge()
-                    ->color('gray')
-                    ->placeholder('-'),
+                    ->copyable()
+                    ->placeholder('-')
+                    ->extraAttributes([
+                        'class' => 'fi-luno-badge font-mono font-bold text-sm tracking-wide',
+                    ]),
 
                 TextColumn::make('port')
                     ->label('Port')
@@ -101,6 +108,7 @@ class TerminalsTable
                     ->label('Vendor')
                     ->searchable()
                     ->badge()
+                    ->wrap()
                     ->color(fn (?string $state): string => match ($state) {
                         'SRISHINDU', 'SRISHINDU INFORMATIKA' => 'purple',
                         'ASSINDO' => 'info',
